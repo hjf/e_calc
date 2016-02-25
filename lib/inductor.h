@@ -30,9 +30,9 @@
 #ifndef INDUCTOR_H
 #define INDUCTOR_H
 
-double inductor_parallel_calc(int count, ...);
+double inductor_parallel_calc(int count, double *values);
 
-double inductor_series_calc(int count, ...);
+double inductor_series_calc(int count, double *values);
 
 char *inductor_sprintf(int places, double value );
 

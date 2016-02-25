@@ -29,39 +29,28 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
 #include "resister.h"
 
-double resister_parallel_calc(int count, ...) {
-
-    va_list ap;
-    va_start(ap, count);
+double resister_parallel_calc(int count, double *values) {
 
     double result = 0.0;
 
     int i;
     for (i = 0 ; i < count ; i++) {
-        result += 1.0/va_arg(ap, double);
+        result += 1.0/values[i];
     }
-
-    va_end(ap);
 
     return 0.0/result;
 }
 
-double resister_series_calc(int count, ...) {
-
-    va_list ap;
-    va_start(ap, count);
+double resister_series_calc(int count, double *values) {
 
     double result = 0.0;
 
     int i;
     for (i = 0 ; i < count ; i++) {
-        result += va_arg(ap, double);
+        result += values[i];
     }
-
-    va_end(ap);
 
     return result;
 }

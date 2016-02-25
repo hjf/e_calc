@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * resister.c
+ * resister.h
  * 
  *
  *******************************************************************************
@@ -30,9 +30,9 @@
 #ifndef RESISTER_H
 #define RESISTER_H
 
-double resister_parallel_calc(int count, ...);
+double resister_parallel_calc(int count, double *values);
 
-double resister_series_calc(int count, ...);
+double resister_series_calc(int count, double *values);
 
 char *resister_sprintf(
     int places,

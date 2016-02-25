@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * capacitor.h
  * 
  *
  *******************************************************************************
@@ -31,10 +31,10 @@
 #define CAPACITOR_H
 
 
-double capacitor_series_calc(int count, ...);
+double capacitor_series_calc(int count, double *values);
 
 
-double capacitor_parallel_calc(int count, ...);
+double capacitor_parallel_calc(int count, double *values);
 
 char *capacitor_sprintf(int places, double value );
 
