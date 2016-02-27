@@ -118,21 +118,21 @@ int capacitor_sscanf(
     nConv = sscanf(str, "%lf%1[Uu]%1[fF]", result, mod, mod+1);
 
     if (nConv == 3 && 0 == strcasecmp("uf", mod) ) {
-        (*result) *= 1e-3;
+        (*result) *= 1e-6;
         return 1;
     }
 
     nConv = sscanf(str, "%lf%1[Nn]%1[fF]", result, mod, mod+1);
 
     if (nConv == 3 && 0 == strcasecmp("nf", mod) ) {
-        (*result) *= 1e-3;
+        (*result) *= 1e-9;
         return 1;
     }
 
     nConv = sscanf(str, "%lf%1[Pp]%1[fF]", result, mod, mod+1);
 
     if (nConv == 3 && 0 == strcasecmp("pf", mod) ) {
-        (*result) *= 1e-3;
+        (*result) *= 1e-12;
         return 1;
     }
 

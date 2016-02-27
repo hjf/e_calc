@@ -18,4 +18,8 @@ libe_calc_la_SOURCES = \
 	resister.c      \
 	decibel.c       \
 	capacitor.c     \
-	inductor.c
+	inductor.c      \
+	l_network.c
+
+
+

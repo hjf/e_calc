@@ -33,12 +33,19 @@
 
 #include "butterworth.h"
 #include "chebyshev.h"
-
+#include "capacitor.h"
+#include "inductor.h"
+#include "resister.h"
+#include "resister.h"
 
 void help (char *argv0) {
     
     printf("%s butterworth <calc> <calc args>\n", argv0); 
     printf("%s chebyshev <calc> <calc args>\n", argv0);
+    printf("%s capacitor <calc> <calc args>\n", argv0);
+    printf("%s inductor <calc> <calc args>\n", argv0);
+    printf("%s resister <calc> <calc args>\n", argv0);
+    printf("%s l_network <calc args>\n", argv0);
 
 }
 
@@ -57,6 +64,20 @@ int main (int argc, char *argv[]) {
 
     if (0 == strcasecmp(argv[1], "chebyshev") ) {
         chebyshev_parse(argc, argv);
+    }
+
+    if (0 == strcasecmp(argv[1], "capacitor") ) {
+        capacitor_parse(argc, argv);
+    }
+    if (0 == strcasecmp(argv[1], "inductor") ) {
+        inductor_parse(argc, argv);
+    }
+    if (0 == strcasecmp(argv[1], "resister") ) {
+        resister_parse(argc, argv);
+    }
+
+    if (0 == strcasecmp(argv[1], "l_network") ) {
+        l_network_parse(argc, argv);
     }
 
     else {

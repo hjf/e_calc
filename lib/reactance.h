@@ -37,5 +37,13 @@
 
 #define XL (f, l) (2 * M_PI * (f) * (l) )
 
+#define C_XlF(Xl, F) ((Xl) / (2*M_PI*(F)))
+
+#define C_XcF(Xc, F) (1/(2*M_PI*(F)*(Xc)))
+
+#define Xl_QR(Q, R) ((Q)*(R))
+
+#define Xc_QR(Q, R) ((R)/(Q))
+
 #endif
 

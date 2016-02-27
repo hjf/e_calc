@@ -21,7 +21,11 @@ bin_PROGRAMS = \
 e_calc_SOURCES = \
 	e_calc.c        \
 	butterworth.c   \
-	chebyshev.c
+	chebyshev.c     \
+	capacitor.c     \
+	inductor.c      \
+	resister.c      \
+	l_network.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \
