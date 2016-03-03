@@ -25,7 +25,7 @@ e_calc_SOURCES = \
 	capacitor.c     \
 	inductor.c      \
 	resister.c      \
-	l_network.c
+	match_network.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \

@@ -129,7 +129,8 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libe_calc_la_LIBADD =
 am_libe_calc_la_OBJECTS = butterworth.lo chebyshev.lo frequency.lo \
-	resister.lo decibel.lo capacitor.lo inductor.lo l_network.lo
+	resister.lo decibel.lo capacitor.lo inductor.lo \
+	match_network.lo
 libe_calc_la_OBJECTS = $(am_libe_calc_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -333,7 +334,7 @@ libe_calc_la_SOURCES = \
 	decibel.c       \
 	capacitor.c     \
 	inductor.c      \
-	l_network.c
+	match_network.c
 
 all: all-am
 
@@ -419,7 +420,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/decibel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frequency.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inductor.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l_network.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match_network.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Plo@am__quote@
 
 .c.o:

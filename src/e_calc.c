@@ -45,7 +45,7 @@ void help (char *argv0) {
     printf("%s capacitor <calc> <calc args>\n", argv0);
     printf("%s inductor <calc> <calc args>\n", argv0);
     printf("%s resister <calc> <calc args>\n", argv0);
-    printf("%s l_network <calc args>\n", argv0);
+    printf("%s match_network <calc> <calc args>\n", argv0);
 
 }
 
@@ -76,8 +76,8 @@ int main (int argc, char *argv[]) {
         resister_parse(argc, argv);
     }
 
-    if (0 == strcasecmp(argv[1], "l_network") ) {
-        l_network_parse(argc, argv);
+    if (0 == strcasecmp(argv[1], "match_network") ) {
+        match_network_parse(argc, argv);
     }
 
     else {

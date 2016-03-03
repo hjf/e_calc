@@ -103,7 +103,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_e_calc_OBJECTS = e_calc.$(OBJEXT) butterworth.$(OBJEXT) \
 	chebyshev.$(OBJEXT) capacitor.$(OBJEXT) inductor.$(OBJEXT) \
-	resister.$(OBJEXT) l_network.$(OBJEXT)
+	resister.$(OBJEXT) match_network.$(OBJEXT)
 e_calc_OBJECTS = $(am_e_calc_OBJECTS)
 e_calc_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -309,7 +309,7 @@ e_calc_SOURCES = \
 	capacitor.c     \
 	inductor.c      \
 	resister.c      \
-	l_network.c
+	match_network.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \
@@ -414,7 +414,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chebyshev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e_calc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inductor.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/l_network.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match_network.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Po@am__quote@
 
 .c.o:

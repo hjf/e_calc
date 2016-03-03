@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * l_network.c
+ * q.h
  * 
  *
  *******************************************************************************
@@ -27,52 +27,11 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include "l_network.h"
-#include "reactance.h"
+#ifndef Q_H
+#define Q_H
 
+#define Q_R1_R2(R1, R2) (sqrt((R1)/(R2) -1.0))
 
-#define MIN(a, b) ( ((a) < (b)) ? (a): (b) )
-#define MAX(a, b) ( ((a) > (b)) ? (a): (b) )
+#define Q_FcutBw(Fcut, Bw) ((Fcut)/(Bw))
 
-
-#define Q(R1, R2) (sqrt((R1)/(R2) -1.0))
-
-
-struct l_network l_network(
-    double Rg,
-    double Rl,
-    double Fcut
-) {
-
-    struct l_network result;
-
-    double Xl;
-    double Xc;
-    double Q;
-
-    if (Rg < Rl) {
-
-        Q = Q(Rl, Rg);
-        Xl = Xl_QR(Q, Rg);
-        Xc = Xc_QR(Q, Rl);
-        result.pi = 0;
-    }
-    else {
-        Q = Q(Rg, Rl);
-        Xl = Xl_QR(Q, Rl);
-        Xc = Xc_QR(Q, Rg);
-        result.pi = 1;
-
-    }
-    
-    result.L = C_XlF(Xl, Fcut);
-    result.C = C_XcF(Xc, Fcut);
-
-    return result;
-
-}
-
-
-
-
-
+#endif

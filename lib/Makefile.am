@@ -19,7 +19,7 @@ libe_calc_la_SOURCES = \
 	decibel.c       \
 	capacitor.c     \
 	inductor.c      \
-	l_network.c
+	match_network.c
 
 
 

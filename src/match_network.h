@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * l_network.h
+ * match_network.h
  * 
  *
  *******************************************************************************
@@ -28,10 +28,10 @@
 ******************************************************************************/
 
 
-#ifndef L_NETWORK_H
-#define L_NETWORK_H
+#ifndef MATCH_NETWORK_H
+#define MATCH_NETWORK_H
 
 
-int l_network_parse (int argc, char *argv[]);
+int match_network_parse (int argc, char *argv[]);
 
 #endif
