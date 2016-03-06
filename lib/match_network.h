@@ -33,32 +33,53 @@
 
 struct match_network {
     int series;
-    double L[2];
-    double C[2];
+    double *L;
+    double *C;
+    double *Zi;
     double BW;
+    int nOrder;
 };
 
+void match_network_free(struct match_network * m);
 
-struct match_network match_network_l(
-    double Rg,
-    double Rl,
-    double Fcut
+/*******************************************************************************
+    function to calculate a lowpass impedance match
+
+*******************************************************************************/
+
+struct match_network *match_network_l_lowpass(
+    double Zgen,
+    double Zload,
+    double Fcut,
+    int nOrder
 );
 
-struct match_network match_network_pi(
+/*******************************************************************************
+    function to calculate a highpass impedance match
+
+*******************************************************************************/
+
+struct match_network *match_network_l_highpass(
+    double Zgen,
+    double Zload,
+    double Fcut,
+    int nOrder
+);
+
+struct match_network *match_network_pi(
     double Rg,
     double Rl,
     double Fcut,
     double Fbw
 );
 
-struct match_network match_network_pi2(
+struct match_network *match_network_pi2(
     double Rg,
     double Rl,
     double Fcut
 );
 
-struct match_network match_network_t(
+struct match_network *match_network_t(
     double Rg,
     double Rl,
     double Fcut,

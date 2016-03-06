@@ -38,97 +38,47 @@
 
 void match_network_printcalcs (void) {
 
-    printf ("l\n");
-    printf ("pi\n");
+    printf ("l_lowpass\n");
+    printf ("l_highpass\n");
 
 }
 
 void match_network_calchelp (char *calc) {
 
-    if (0 == strcasecmp (calc, "l")) {
-        printf ("e_calc match_network l <generator Impedance> <load Impedance> <Cuttof Freq>\n");
+    if (0 == strcasecmp (calc, "l_lowpass")) {
+        printf ("e_calc match_network l_lowpass <generator Impedance> <load Impedance> <Cuttof Freq> <filter order>\n");
     }
-    if (0 == strcasecmp (calc, "pi")) {
-        printf ("e_calc match_network pi <generator Impedance> <load Impedance> <Cuttof Freq> <width freq>\n");
+    if (0 == strcasecmp (calc, "l_highpass")) {
+        printf ("e_calc match_network l_highpass <generator Impedance> <load Impedance> <Cuttof Freq> <filter order>\n");
     }
-    if (0 == strcasecmp (calc, "pi2")) {
-        printf ("e_calc match_network pi2 <generator Impedance> <load Impedance> <Cuttof Freq>\n");
+
+    if (0 == strcasecmp (calc, "pi_lowpass")) {
+        printf ("e_calc match_network l_lowpass <generator Impedance> <load Impedance> <Cuttof Freq>\n");
+    }
+    if (0 == strcasecmp (calc, "pi_highpass")) {
+        printf ("e_calc match_network l_highpass <generator Impedance> <load Impedance> <Cuttof Freq>\n");
     }
 }
 
 
 int match_network_parse (int argc, char *argv[]) {
 
-    struct match_network result;
+    struct match_network *result;
     double Rg;
     double Rl;
     double Fcut;
     double Fbw;
     double middle;
+    int nOrder;
     char *value;
+    int i;
 
     if (argc < 3) {
         match_network_printcalcs();
         exit (EXIT_FAILURE);
     }
 
-    if (0 == strcasecmp (argv[2], "l")) {
-        if (argc < 6) {
-            match_network_calchelp (argv[2]);
-            exit (EXIT_FAILURE);
-        }
-
-        if (!resister_sscanf (argv[3], &Rg)) {
-            match_network_calchelp (argv[2]);
-            exit (EXIT_FAILURE);
-        }
-
-        if (!resister_sscanf (argv[4], &Rl)) {
-            match_network_calchelp (argv[2]);
-            exit (EXIT_FAILURE);
-        }
-
-        if (!frequency_sscanf (argv[5], &Fcut)) {
-            match_network_calchelp (argv[2]);
-            exit (EXIT_FAILURE);
-        }
-
-
-        result = match_network_l (Rg, Rl, Fcut);
-
-
-        if ( result.series )
-            printf("Series First\n");
-        else
-            printf("Shunt First\n");
-
-        
-
-        if (!(value = inductor_sprintf (4, result.L[0]))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("L = %s\n", value);
-            free (value);
-        }
-
-        if (!(value = capacitor_sprintf (4, result.C[0]))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("C = %s\n", value);
-            free (value);
-        }
-        if (!(value = frequency_sprintf (4, result.BW))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("BW = %s\n", value);
-            free (value);
-        }
-
-    }
-    else if (0 == strcasecmp (argv[2], "pi")) {
+    if (0 == strcasecmp (argv[2], "l_lowpass")) {
         if (argc < 7) {
             match_network_calchelp (argv[2]);
             exit (EXIT_FAILURE);
@@ -149,77 +99,158 @@ int match_network_parse (int argc, char *argv[]) {
             exit (EXIT_FAILURE);
         }
 
-        if (!frequency_sscanf (argv[6], &Fbw)) {
+        else if (1 != sscanf (argv[6], "%i", &nOrder)) {
             match_network_calchelp (argv[2]);
             exit (EXIT_FAILURE);
         }
 
+        if (!(result = match_network_l_lowpass (Rg, Rl, Fcut, nOrder)))
+            exit (EXIT_FAILURE);
 
-        result = match_network_pi (Rg, Rl, Fcut, Fbw);
+        if (result->series)
+            printf("series first\n");
+        else
+            printf("shunt first\n");
 
-        
-        printf("highpass\n");
-        if (!(value = inductor_sprintf (4, result.L[0]))) {
+        if (!(value = resister_sprintf (4, Rg))) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("L[0] = %s\n", value);
+            printf ("Z = %s\n", value);
             free (value);
         }
 
-        middle = capacitor_series_calc(2, result.C);
-        if (!(value = capacitor_sprintf (4, middle))) {
+        for (i = 0; i < result->nOrder; i++) {
+
+            if (!(value = capacitor_sprintf (10, result->C[i]))) {
+                match_network_free(result);
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("C[%i] = %s\n", i, value);
+                free (value);
+            }
+
+            if (!(value = inductor_sprintf (4, result->L[i]))) {
+                match_network_free(result);
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("L[%i] = %s\n", i, value);
+                free (value);
+            }
+
+            if (!(value = resister_sprintf (4, result->Zi[i]))) {
+                match_network_free(result);
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("Z = %s\n", value);
+                free (value);
+            }
+
+        }
+
+        if (!(value = frequency_sprintf (4, result->BW))) {
+            match_network_free(result);
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("C = %s\n", value);
+            printf ("Fbw = %s\n", value);
             free (value);
         }
 
-        if (!(value = inductor_sprintf (4, result.L[1]))) {
+        match_network_free(result);
+
+
+    }
+    else if (0 == strcasecmp (argv[2], "l_highpass")) {
+        if (argc < 7) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!resister_sscanf (argv[3], &Rg)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!resister_sscanf (argv[4], &Rl)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!frequency_sscanf (argv[5], &Fcut)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        else if (1 != sscanf (argv[6], "%i", &nOrder)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!(result = match_network_l_highpass (Rg, Rl, Fcut, nOrder)))
+            exit (EXIT_FAILURE);
+
+        if (result->series)
+            printf("series first\n");
+        else
+            printf("shunt first\n");
+
+        if (!(value = resister_sprintf (4, Rg))) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("L[1] = %s\n", value);
+            printf ("Z = %s\n", value);
             free (value);
         }
 
-        printf("lowpass\n");
-        if (!(value = capacitor_sprintf (4, result.C[0]))) {
+        for (i = 0; i < result->nOrder; i++) {
+
+            if (!(value = capacitor_sprintf (10, result->C[i]))) {
+                match_network_free(result);
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("C[%i] = %s\n", i, value);
+                free (value);
+            }
+
+            if (!(value = inductor_sprintf (4, result->L[i]))) {
+                match_network_free(result);
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("L[%i] = %s\n", i, value);
+                free (value);
+            }
+
+            if (!(value = resister_sprintf (4, result->Zi[i]))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("Z = %s\n", value);
+                free (value);
+            }
+
+        }
+
+        if (!(value = frequency_sprintf (4, result->BW))) {
+            match_network_free(result);
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("C[0] = %s\n", value);
+            printf ("Fbw = %s\n", value);
             free (value);
         }
 
-        middle = inductor_series_calc(2, result.L);
-        if (!(value = inductor_sprintf (4, middle))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("L = %s\n", value);
-            free (value);
-        }
+        match_network_free(result);
 
-        if (!(value = capacitor_sprintf (4, result.C[1]))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("c[1] = %s\n", value);
-            free (value);
-        }
 
-        if (!(value = frequency_sprintf (4, result.BW))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("BW = %s\n", value);
-            free (value);
-        }
     }
 
-    else if (0 == strcasecmp (argv[2], "pi2")) {
+    else if (0 == strcasecmp (argv[2], "pi_lowpass")) {
         if (argc < 6) {
             match_network_calchelp (argv[2]);
             exit (EXIT_FAILURE);
@@ -240,37 +271,19 @@ int match_network_parse (int argc, char *argv[]) {
             exit (EXIT_FAILURE);
         }
 
-        
-        result = match_network_pi2 (Rg, Rl, Fcut);
+        if (!(result = match_network_l_lowpass (Rg, Rl, Fcut, 2)))
+            exit (EXIT_FAILURE);
 
-        printf("highpass\n");
-        if (!(value = inductor_sprintf (4, result.L[0]))) {
+        if (!(value = resister_sprintf (4, Rg))) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("L[0] = %s\n", value);
+            printf ("Z = %s\n", value);
             free (value);
         }
 
-        middle = capacitor_series_calc(2, result.C);
-        if (!(value = capacitor_sprintf (4, middle))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("C = %s\n", value);
-            free (value);
-        }
-
-        if (!(value = inductor_sprintf (4, result.L[1]))) {
-            exit (EXIT_FAILURE);
-        }
-        else {
-            printf ("L[1] = %s\n", value);
-            free (value);
-        }
-
-        printf("lowpass\n");
-        if (!(value = capacitor_sprintf (4, result.C[0]))) {
+        if (!(value = capacitor_sprintf (10, result->C[0]))) {
+            match_network_free(result);
             exit (EXIT_FAILURE);
         }
         else {
@@ -278,8 +291,10 @@ int match_network_parse (int argc, char *argv[]) {
             free (value);
         }
 
-        middle = inductor_series_calc(2, result.L);
-        if (!(value = inductor_sprintf (4, middle))) {
+        middle = inductor_series_calc(2, result->L);
+
+        if (!(value = inductor_sprintf (4, middle ))) {
+            match_network_free(result);
             exit (EXIT_FAILURE);
         }
         else {
@@ -287,24 +302,137 @@ int match_network_parse (int argc, char *argv[]) {
             free (value);
         }
 
-        if (!(value = capacitor_sprintf (4, result.C[1]))) {
+        if (!(value = resister_sprintf (4, result->Zi[0]))) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("c[1] = %s\n", value);
+            printf ("Z = %s\n", value);
             free (value);
         }
 
-        if (!(value = frequency_sprintf (4, result.BW))) {
+        if (!(value = capacitor_sprintf (10, result->C[1]))) {
+            match_network_free(result);
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("BW = %s\n", value);
+            printf ("C[1] = %s\n", value);
             free (value);
         }
+
+        if (!(value = resister_sprintf (4, result->Zi[1]))) {
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Z = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = frequency_sprintf (4, result->BW))) {
+            match_network_free(result);
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Fbw = %s\n", value);
+            free (value);
+        }
+
+        match_network_free(result);
+
+
     }
 
-   else {
+    else if (0 == strcasecmp (argv[2], "pi_highpass")) {
+        if (argc < 6) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!resister_sscanf (argv[3], &Rg)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!resister_sscanf (argv[4], &Rl)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!frequency_sscanf (argv[5], &Fcut)) {
+            match_network_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!(result = match_network_l_highpass (Rg, Rl, Fcut, 2)))
+            exit (EXIT_FAILURE);
+
+        if (!(value = resister_sprintf (4, Rg))) {
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Z = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = inductor_sprintf (10, result->L[0]))) {
+            match_network_free(result);
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("L[0] = %s\n", value);
+            free (value);
+        }
+
+        middle = capacitor_series_calc(2, result->C);
+
+        if (!(value = capacitor_sprintf (4, middle ))) {
+            match_network_free(result);
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("C = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = resister_sprintf (4, result->Zi[0]))) {
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Z = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = inductor_sprintf (10, result->L[1]))) {
+            match_network_free(result);
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("L[1] = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = resister_sprintf (4, result->Zi[1]))) {
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Z = %s\n", value);
+            free (value);
+        }
+
+        if (!(value = frequency_sprintf (4, result->BW))) {
+            match_network_free(result);
+            exit (EXIT_FAILURE);
+        }
+        else {
+            printf ("Fbw = %s\n", value);
+            free (value);
+        }
+
+        match_network_free(result);
+
+
+    }
+
+    else {
         match_network_printcalcs();
         exit (EXIT_FAILURE);
     }

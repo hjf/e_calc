@@ -27,6 +27,7 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
+#include <stdlib.h>
 #include "match_network.h"
 #include "reactance.h"
 #include "q.h"
@@ -34,167 +35,221 @@
 #define MIN(a, b) ( ((a) < (b)) ? (a): (b) )
 #define MAX(a, b) ( ((a) > (b)) ? (a): (b) )
 
-#define RV(Rh, Q) ( Rh / ((Q * Q)  + 1) )
+#define RV_RhQ(Rh, Q) ( Rh / ((Q * Q)  + 1) )
+#define RV_RlQ(Zload, Q) ( Zload * ((Q * Q)  + 1) )
 
 #define GEOMETRIC_MEAN(R1, R2) (sqrt((R1)*(R2)))
+/***** geometricly divide the impedance mismatch into nOrder *****/
+/***** sections                                              *****/
+/***** (50*50*50*1000)^(1/4)     = 105.737126344             *****/
+/***** (50*50*1000*1000)^(1/4)   = 223.60679775              *****/
+/***** (50*1000*1000*1000)^(1/4) = 472.870804502             *****/
 
+#define GEOMETRIC_DIVIDE(a, b, n, i) ( pow ( pow( (a), ((double)(n)-(double)(i)) ) * pow( (b), ((double)(i)) )  , (1.0/(double)(n))) )
 
-struct match_network match_network_l(
-    double Rg,
-    double Rl,
-    double Fcut
-) {
-
-    struct match_network result;
-
-    double Xl;
-    double Xc;
-    double Q;
-
-    if (Rg < Rl) {
-
-        Q = Q_R1_R2(Rl, Rg);
-        Xl = Xl_QR(Q, Rg);
-        Xc = Xc_QR(Q, Rl);
-        result.series = 1;
-    }
-    else {
-        Q = Q_R1_R2(Rg, Rl);
-        Xl = Xl_QR(Q, Rl);
-        Xc = Xc_QR(Q, Rg);
-        result.series = 0;
-
-    }
-    
-    result.L[0] = C_XlF(Xl, Fcut);
-    result.C[0] = C_XcF(Xc, Fcut);
-    result.BW = Fcut/Q;
-
-    return result;
-
+void match_network_free(struct match_network * m) {
+    free(m->C);
+    free(m->L);
+    free(m);
 }
 
-struct match_network match_network_pi(
-    double Rg,
-    double Rl,
+struct match_network *match_network_malloc(unsigned int nOrder) {
+
+    struct match_network *result;
+
+    if (NULL == (result = malloc(sizeof(struct match_network)) ))
+        return NULL;
+
+    if (NULL == (result->C = malloc(sizeof(double) * nOrder) )) {
+        free(result);
+        return NULL;
+    }
+
+    if (NULL == (result->L = malloc(sizeof(double) * nOrder) )) {
+        free(result->C);
+        free(result);
+        return NULL;
+    }
+
+    if (NULL == (result->Zi = malloc(sizeof(double) * nOrder) )) {
+        free(result->C);
+        free(result->L);
+        free(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+
+/*******************************************************************************
+    function to calculate a lowpass impedance match
+
+*******************************************************************************/
+
+struct match_network *match_network_l_lowpass(
+    double Zgen,
+    double Zload,
     double Fcut,
-    double Fbw
+    int nOrder
 ) {
 
-    struct match_network result;
+    struct match_network *result;
 
-    double Xl;
-    double Xc;
+    double Xseries;
+    double Xshunt;
     double Q;
-    double Rv;
+    double lastZ;
+    double Zi;
+    int i;
 
+    if (NULL == (result = match_network_malloc(nOrder) ))
+        return NULL;
+
+
+    if (Zgen < Zload) {
         
-    if (Rg < Rl) {
+        i = 1;        
+        lastZ = Zgen;
+        result->series = 1;
 
-        Q = Q_FcutBw(Fcut, Fbw);
-        Rv = RV(Rl, Q);
+        do {
 
-        Xl = Xl_QR(Q, Rv);
-        Xc = Xc_QR(Q, Rl);
+            if (i < nOrder)
+                Zi = GEOMETRIC_DIVIDE(Zgen, Zload, nOrder, i);
+            else
+                Zi = Zload;
 
-        result.L[0] = C_XlF(Xl, Fcut);
-        result.C[0] = C_XcF(Xc, Fcut);
+            Q = Q_R1_R2(Zi, lastZ);
+            Xseries = XSeries_QR(Q, lastZ);
+            Xshunt = XShunt_QR(Q, Zi);
 
-        Q = Q_R1_R2(Rv, Rg);
+            result->L[i - 1] = L_XlF(Xseries, Fcut);
+            result->C[i - 1] = C_XcF(Xshunt, Fcut);
+            result->Zi[i-1] = Zi;
 
-        Xl = Xl_QR(Q, Rg);
-        Xc = Xc_QR(Q, Rv);
-
-        result.L[1] = C_XlF(Xl, Fcut);
-        result.C[1] = C_XcF(Xc, Fcut);
-
+            lastZ=Zi;
+            i++;
+        } while (i <= nOrder);
+    
     }
     else {
-        
-        Q = Q_FcutBw(Fcut, Fbw);
-        Rv = RV(Rg, Q);
-        
-        Xl = Xl_QR(Q, Rv);
-        Xc = Xc_QR(Q, Rg);
 
-        result.L[0] = C_XlF(Xl, Fcut);
-        result.C[0] = C_XcF(Xc, Fcut);
+        i = 1;        
+        lastZ = Zgen;
+        result->series = 0;
 
-        Q = Q_R1_R2(Rv, Rl);
+        do {
 
-        Xl = Xl_QR(Q, Rl);
-        Xc = Xc_QR(Q, Rv);
+            if (i < nOrder)
+                Zi = GEOMETRIC_DIVIDE(Zgen, Zload, nOrder, i);
+            else
+                Zi = Zload;
 
-        result.L[1] = C_XlF(Xl, Fcut);
-        result.C[1] = C_XcF(Xc, Fcut);
+            Q = Q_R1_R2(lastZ, Zi);
+            Xseries = XSeries_QR(Q, Zi);
+            Xshunt = XShunt_QR(Q, lastZ);
+
+            result->L[i - 1] = L_XlF(Xseries, Fcut);
+            result->C[i - 1] = C_XcF(Xshunt, Fcut);
+            result->Zi[i-1] = Zi;
+
+            lastZ=Zi;
+            i++;
+        } while (i <= nOrder);
+    
 
     }
     
-    result.BW = Fbw;
+    result->nOrder = nOrder;
+    result->BW = Fcut/Q;
 
     return result;
-
 }
 
-struct match_network match_network_pi2(
-    double Rg,
-    double Rl,
-    double Fcut
+/*******************************************************************************
+    function to calculate a highpass impedance match
+
+*******************************************************************************/
+
+struct match_network *match_network_l_highpass(
+    double Zgen,
+    double Zload,
+    double Fcut,
+    int nOrder
 ) {
 
-    struct match_network result;
+    struct match_network *result;
 
-    double Xl;
-    double Xc;
+    double Xseries;
+    double Xshunt;
     double Q;
-    double Rv;
+    double lastZ;
+    double Zi;
+    int i;
 
-    Rv = GEOMETRIC_MEAN(Rg, Rl);
+    if (NULL == (result = match_network_malloc(nOrder) ))
+        return NULL;
 
-    if (Rg < Rl) {
 
-        Q = Q_R1_R2(Rl, Rv);
+    if (Zgen < Zload) {
+        
+        i = 1;        
+        lastZ = Zgen;
+        result->series = 1;
 
-        Xl = Xl_QR(Q, Rv);
-        Xc = Xc_QR(Q, Rl);
+        do {
 
-        result.L[0] = C_XlF(Xl, Fcut);
-        result.C[0] = C_XcF(Xc, Fcut);
+            if (i < nOrder)
+                Zi = GEOMETRIC_DIVIDE(Zgen, Zload, nOrder, i);
+            else
+                Zi = Zload;
 
-        Q = Q_R1_R2(Rv, Rg);
+            Q = Q_R1_R2(Zi, lastZ);
+            Xseries = XSeries_QR(Q, lastZ);
+            Xshunt = XShunt_QR(Q, Zi);
 
-        Xl = Xl_QR(Q, Rg);
-        Xc = Xc_QR(Q, Rv);
+            result->L[i - 1] = L_XlF(Xshunt, Fcut);
+            result->C[i - 1] = C_XcF(Xseries, Fcut);
+            result->Zi[i-1] = Zi;
 
-        result.L[1] = C_XlF(Xl, Fcut);
-        result.C[1] = C_XcF(Xc, Fcut);
-
+            lastZ=Zi;
+            i++;
+        } while (i <= nOrder);
+    
     }
     else {
-        
-        
-        Q = Q_R1_R2(Rg, Rv);
 
-        Xl = Xl_QR(Q, Rv);
-        Xc = Xc_QR(Q, Rg);
+        i = 1;        
+        lastZ = Zgen;
+        result->series = 0;
 
-        result.L[0] = C_XlF(Xl, Fcut);
-        result.C[0] = C_XcF(Xc, Fcut);
+        do {
 
-        Q = Q_R1_R2(Rv, Rl);
+            if (i < nOrder)
+                Zi = GEOMETRIC_DIVIDE(Zgen, Zload, nOrder, i);
+            else
+                Zi = Zload;
 
-        Xl = Xl_QR(Q, Rl);
-        Xc = Xc_QR(Q, Rv);
+            Q = Q_R1_R2(lastZ, Zi);
+            Xseries = XSeries_QR(Q, Zi);
+            Xshunt = XShunt_QR(Q, lastZ);
 
-        result.L[1] = C_XlF(Xl, Fcut);
-        result.C[1] = C_XcF(Xc, Fcut);
+            result->L[i - 1] = L_XlF(Xshunt, Fcut);
+            result->C[i - 1] = C_XcF(Xseries, Fcut);
+            result->Zi[i-1] = Zi;
+
+            lastZ=Zi;
+            i++;
+        } while (i <= nOrder);
+    
 
     }
     
-    result.BW = Fcut/Q;
+    result->nOrder = nOrder;
+    result->BW = Fcut/Q;
 
     return result;
-
 }
 
 

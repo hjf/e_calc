@@ -89,7 +89,7 @@ int resister_parse (int argc, char *argv[]) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("C = %s\n", value);
+            printf ("R = %s\n", value);
             free (value);
         }
     }
@@ -119,7 +119,7 @@ int resister_parse (int argc, char *argv[]) {
             exit (EXIT_FAILURE);
         }
         else {
-            printf ("C = %s\n", value);
+            printf ("R = %s\n", value);
             free (value);
         }
     }
