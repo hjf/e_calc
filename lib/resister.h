@@ -30,6 +30,12 @@
 #ifndef RESISTER_H
 #define RESISTER_H
 
+
+#define RSeries_QX(Q, X) ((X)/(Q))
+
+#define RShunt_QX(Q, X) ((X)*(Q))
+
+
 double resister_parallel_calc(int count, double *values);
 
 double resister_series_calc(int count, double *values);

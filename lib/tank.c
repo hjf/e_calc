@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * q.h
+ * tank.c
  * 
  *
  *******************************************************************************
@@ -27,19 +27,36 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#ifndef Q_H
-#define Q_H
-
-#define Q_R1_R2(R1, R2) (sqrt((R1)/(R2) -1.0))
-
-#define Q_FcutBw(Fcut, Bw) ((Fcut)/(Bw))
-
-#define Qseries_XR(X, R) ((X)/(R))
-
-#define QShunt_XR(X, R) ((R)/(X))
-
-#define Q_FbwFcut(Fbw, Fcut) ( (Fcut)/(Fbw) )
+#include "reactance.h"
+#include "q.h"
 
 
+struct Tank {
+    double C;
+    double L;
+};
 
-#endif
+struct Tank Tank_calc(
+    double Fcenter,
+    double Fwidth,
+    double Z,
+) {
+
+    struct Tank result;
+
+    double Q;
+    double X;
+
+    Q = Q_FbwFcut(Fwidth, Fcenter);
+    
+    X = XShunt_QR(Q, Z);
+
+    result.L = L_XlF(X, Fcenter);
+    result.C = C_XcF(X, Fcenter);
+
+    return result;
+
+}
+
+ 
+

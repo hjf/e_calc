@@ -78,6 +78,8 @@ int match_network_parse (int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
 
+    /***** l_lowpass *****/
+
     if (0 == strcasecmp (argv[2], "l_lowpass")) {
         if (argc < 7) {
             match_network_calchelp (argv[2]);
@@ -164,6 +166,9 @@ int match_network_parse (int argc, char *argv[]) {
 
 
     }
+
+    /***** l_highpass *****/
+
     else if (0 == strcasecmp (argv[2], "l_highpass")) {
         if (argc < 7) {
             match_network_calchelp (argv[2]);
@@ -249,6 +254,8 @@ int match_network_parse (int argc, char *argv[]) {
 
 
     }
+
+    /***** pi_lowpass *****/
 
     else if (0 == strcasecmp (argv[2], "pi_lowpass")) {
         if (argc < 6) {
@@ -340,6 +347,8 @@ int match_network_parse (int argc, char *argv[]) {
 
 
     }
+
+    /***** pi_highpass *****/
 
     else if (0 == strcasecmp (argv[2], "pi_highpass")) {
         if (argc < 6) {

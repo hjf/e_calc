@@ -30,6 +30,12 @@
 #ifndef FREQUENCY_H
 #define FREQUENCY_H
 
+#define Fbw_FcutQ(Fcut, Q) ( (Fcut)/(Q) )
+#define Fcut_FbwQ(Fbw, Q) ( (Fbw)*(Q) )
+
+BW = Fcut/Q;
+
+
 char *frequency_sprintf(
     int places,
     double value
