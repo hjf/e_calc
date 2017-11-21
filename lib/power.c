@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * power.c
  * 
  *
  *******************************************************************************
@@ -27,49 +27,32 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "capacitor.h"
+#include "power.h"
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
+const sprintf_t power_sprintf_table[] = {
+    {1e-9,  1e12,   "pW"},
+    {1e-6,  1e9,    "nW"},
+    {1e-3,  1e6,    "uW"},
+    {1,     1e3,    "mW"},
+    {1e6,    1,     "W"},
+    {1e6,   1e-3,   "KW"},
+    {1e9,   1e-6,   "MW"},
+    {1e12,  1e-9,   "GW"},
+    {-1,    1e-12,  "TW"}
 };
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
+const sscanf_t power_sscanf_table[] = {
+    {1e-12,  3, "%lf%n%*1[pP]%*1[wW]%n"},
+    {1e-9,   3, "%lf%n%*1[nN]%*1[wW]%n"},
+    {1e-6,   2, "%lf%n%*1[uU]%*1[wW]%n"},
+    {1e-3,   3, "%lf%n%*1[mM]%*1[wW]%n"},
+    {1,      2, "%lf%n%*1[wW]%n"},
+    {1e3,    3, "%lf%n%*1[kK]%*1[wW]%n"},
+    {1e6,    3, "%lf%n%*1[M]%*1[wW]%n"},
+    {1e9,    3, "%lf%n%*1[G]%*1[wW]%n"},
+    {1e9,    6, "%lf%n%*1[jJ]%*1[iI]%*1[gG]%*1[aA]%*1[wW]%n"},
+    {1e9,   10, "%lf%n%*1[jJ]%*1[iI]%*1[gG]%*1[aA]%*1[wW]*1[aA]*1[tT]*1[tT]*1[sS]%n"},
+    {1e12,   3, "%lf%n%*1[T]%*1[wW]%n"},
     {0,      0, ""}
 };
-
-double capacitor_series_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
-
-    return 1.0/result;
-}
-
-double capacitor_parallel_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
-    }
-
-    return result;
-}
-
 

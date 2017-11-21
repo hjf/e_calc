@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * current.c
  * 
  *
  *******************************************************************************
@@ -27,49 +27,25 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "capacitor.h"
+#include "current.h"
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
+const sprintf_t current_sprintf_table[] = {
+    {1e-9,  1e12,   "pA"},
+    {1e-6,  1e9,    "nA"},
+    {1e-3,  1e6,    "uA"},
+    {1,     1e3,    "mA"},
+    {1e3,   1,      "A"},
+    {1e6,   1e-3,   "KA"},
+    {-1,    1e-6,   "MA"}
 };
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
+const sscanf_t current_sscanf_table[] = {
+    {1e12,   3, "%lf%n%*1[pP]%*1[aA]%n"},
+    {1e9,    3, "%lf%n%*1[nN]%*1[aA]%n"},
+    {1e6,    3, "%lf%n%*1[uU]%*1[aA]%n"},
+    {1e3,    3, "%lf%n%*1[m]%*1[aA]%n"},
+    {1,      2, "%lf%n%*1[aA]%n"},
+    {1e3,    3, "%lf%n%*1[kK]%*1[aA]%n"},
+    {1e6,    3, "%lf%n%*1[M]%*1[aA]%n"},
     {0,      0, ""}
 };
-
-double capacitor_series_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
-
-    return 1.0/result;
-}
-
-double capacitor_parallel_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
-    }
-
-    return result;
-}
-
-

@@ -103,7 +103,9 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_e_calc_OBJECTS = e_calc.$(OBJEXT) butterworth.$(OBJEXT) \
 	chebyshev.$(OBJEXT) capacitor.$(OBJEXT) inductor.$(OBJEXT) \
-	resister.$(OBJEXT) match_network.$(OBJEXT)
+	resister.$(OBJEXT) reactance.$(OBJEXT) ohmslaw.$(OBJEXT) \
+	match_network.$(OBJEXT) tank.$(OBJEXT) magloop.$(OBJEXT) \
+	snr.$(OBJEXT)
 e_calc_OBJECTS = $(am_e_calc_OBJECTS)
 e_calc_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -309,7 +311,12 @@ e_calc_SOURCES = \
 	capacitor.c     \
 	inductor.c      \
 	resister.c      \
-	match_network.c
+	reactance.c      \
+	ohmslaw.c      \
+	match_network.c \
+	tank.c           \
+	magloop.c           \
+    snr.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \
@@ -414,8 +421,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chebyshev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e_calc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inductor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magloop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match_network.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ohmslaw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reactance.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tank.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

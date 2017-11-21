@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * skineffect.h
  * 
  *
  *******************************************************************************
@@ -27,49 +27,27 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "capacitor.h"
+#ifndef SKINEFFECT_H
+#define SKINEFFECT_H
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
-};
+#include math.h
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
-    {0,      0, ""}
-};
+/*******************************************************************************
 
-double capacitor_series_calc(int count, double *values) {
+@param U            Permability of free space
+@param Ur           relative permibility of the conductor
+@param Conductivity Conductivity of the conductor
+@param Freq         Freq 
 
-    double result = 0.0;
+@return the skin effect resistance of the loop
+*******************************************************************************/
 
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
+#define SKIN_R(U, Ur, Conductivity, Freq ) (sqrt(( M_PI * (Freq) *(U) * (Ur)) / (Conductivity)))
 
-    return 1.0/result;
-}
+#define SKIN_DEPTH(FREQ, PERMABILITY, CONDUCTIVITY) (1 /M_PI * (FREQ) * (PERMABILITY) * (CONDUCTIVITY))
 
-double capacitor_parallel_calc(int count, double *values) {
+   
+#endif
 
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
-    }
-
-    return result;
-}
 
 

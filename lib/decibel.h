@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * decibel.c
+ * decibel.h
  * 
  *
  *******************************************************************************
@@ -30,15 +30,17 @@
 #ifndef DECIBEL_H
 #define DECIBEL_H
 
-char *decibel_sprintf(
-    int places,
-    double value
-);
+#include "io.h"
 
-int decibel_sscanf(
-    char *str,
-    double *result
-);
+extern const sprintf_t decibel_sprintf_table[];
+
+#define decibel_sprintf(places, value) io_sprintf((places), (value), decibel_sprintf_table)
+
+extern const sscanf_t decibel_sscanf_table[];
+
+#define decibel_sscanf(str, result) io_sscanf((str), (result), decibel_sscanf_table)
+
+
 
 #endif
 

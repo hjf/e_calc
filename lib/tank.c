@@ -27,19 +27,15 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
+#include "tank.h"
 #include "reactance.h"
 #include "q.h"
 
 
-struct Tank {
-    double C;
-    double L;
-};
-
 struct Tank Tank_calc(
     double Fcenter,
     double Fwidth,
-    double Z,
+    double Z
 ) {
 
     struct Tank result;

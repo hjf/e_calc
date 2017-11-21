@@ -33,13 +33,16 @@
 #include <math.h>
 
 
-#define XC (f, c) (1/(2 * M_PI * (f) * (c) ) )
+#define XC(F, c)     ( 1 / (2 * M_PI * (F)  * (c ) ) )
+#define C_XcF(Xc, F) ( 1 / (2 * M_PI * (F)  * (Xc) ) )
+#define F_XcC(Xc, c) ( 1 / (2 * M_PI * (Xc) * (c ) ) )
 
-#define XL (f, l) (2 * M_PI * (f) * (l) )
 
-#define L_XlF(Xl, F) ((Xl) / (2*M_PI*(F)))
 
-#define C_XcF(Xc, F) (1/(2*M_PI*(F)*(Xc)))
+#define XL(f, l)     ( 2 * M_PI * (f) * (l) )
+#define L_XlF(Xl, F) ( (Xl) / ( 2 * M_PI * (F) ) )
+
+
 
 #define XSeries_QR(Q, R) ((Q)*(R))
 

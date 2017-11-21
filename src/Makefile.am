@@ -25,7 +25,12 @@ e_calc_SOURCES = \
 	capacitor.c     \
 	inductor.c      \
 	resister.c      \
-	match_network.c
+	reactance.c      \
+	ohmslaw.c      \
+	match_network.c \
+	tank.c           \
+	magloop.c           \
+    snr.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \

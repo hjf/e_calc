@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * diplexer.c
  * 
  *
  *******************************************************************************
@@ -27,49 +27,55 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "capacitor.h"
+#include "diplexer.h"
+#include "reactance.h"
+#include "lowpass.h"
+#include "highpass.h"
+#include "q.h"
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
-};
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
-    {0,      0, ""}
-};
+struct Diplexer Diplexer_bandpass(
+    double Fcenter,
+    double Fwidth,
+    double Z
+) {
 
-double capacitor_series_calc(int count, double *values) {
+    struct Tank result;
 
-    double result = 0.0;
+    double Q;
+    double X;
 
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
+    Q = Q_FbwFcut(Fwidth, Fcenter);
 
-    return 1.0/result;
-}
+    result.L[0] = LOWPASS_L(Q, Z, Fcenter);
+    result.C[0] = HIGHPASS_C(Q, Z, Fcenter);
 
-double capacitor_parallel_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
-    }
+    result.L[1] = HIGHPASS_L(Q, Z, Fcut);
+    result.C[1] = LOWPASS_C(Q, Z, Fcut);
 
     return result;
 }
+
+struct Diplexer Diplexer_lowpass(
+    double Fcut,
+    double Fwidth,
+    double Z
+) {
+
+    struct Tank result;
+
+    double Q;
+    double X;
+
+    Q = Q_FbwFcut(Fwidth, Fcenter);
+
+    result.C[0] = HIGHPASS_C(Q, Z, Fcut);
+    result.L[0] = HIGHPASS_L(Q, Z, Fcut);
+
+    return result;
+}
+
+
+
 
 

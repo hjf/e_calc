@@ -30,18 +30,19 @@
 #ifndef CAPACITOR_H
 #define CAPACITOR_H
 
-
 double capacitor_series_calc(int count, double *values);
-
 
 double capacitor_parallel_calc(int count, double *values);
 
-char *capacitor_sprintf(int places, double value );
+#include "io.h"
 
-int capacitor_sscanf(
-    char *str,
-    double *result
-);
+extern const sprintf_t capacitor_sprintf_table[];
+
+#define capacitor_sprintf(places, value) io_sprintf((places), (value), capacitor_sprintf_table)
+
+extern const sscanf_t capacitor_sscanf_table[];
+
+#define capacitor_sscanf(str, result) io_sscanf((str), (result), capacitor_sscanf_table)
 
 #endif
 

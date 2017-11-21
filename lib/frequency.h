@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * frequency.c
+ * frequency.h
  * 
  *
  *******************************************************************************
@@ -30,21 +30,20 @@
 #ifndef FREQUENCY_H
 #define FREQUENCY_H
 
+
 #define Fbw_FcutQ(Fcut, Q) ( (Fcut)/(Q) )
 #define Fcut_FbwQ(Fbw, Q) ( (Fbw)*(Q) )
 
-BW = Fcut/Q;
+#define W_F(F) (300e6/(F) )
+#include "io.h"
 
+extern const sprintf_t frequency_sprintf_table[];
 
-char *frequency_sprintf(
-    int places,
-    double value
-);
+#define frequency_sprintf(places, value) io_sprintf((places), (value), frequency_sprintf_table)
 
-int frequency_sscanf(
-    char *str,
-    double *result
-);
+extern const sscanf_t frequency_sscanf_table[];
+
+#define frequency_sscanf(str, result) io_sscanf((str), (result), frequency_sscanf_table)
 
 #endif
 

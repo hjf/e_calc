@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * dividers.c
  * 
  *
  *******************************************************************************
@@ -27,49 +27,11 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "capacitor.h"
+#ifndef DIVIDERS_H
+#define DIVIDERS_H
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
-};
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
-    {0,      0, ""}
-};
+#define DIVIDER(N1, N2, In) ( ((N1)/((N1)+(N2))) * (In) )
 
-double capacitor_series_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
-
-    return 1.0/result;
-}
-
-double capacitor_parallel_calc(int count, double *values) {
-
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
-    }
-
-    return result;
-}
-
+#endif
 

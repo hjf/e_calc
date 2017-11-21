@@ -27,55 +27,15 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
 #include "decibel.h"
 
+const sprintf_t decibel_sprintf_table[] = {
+    {1e3,  1,   "db"},
+};
 
-char *decibel_sprintf(
-    int places,
-    double value
-) {
- 
-    char units[4] = "dB";
-    double DB = value; 
-    char *result = NULL;
-    
-    size_t len = snprintf(NULL, 0, "%.*f %s", places, DB, units);
+const sscanf_t decibel_sscanf_table[] = {
+    {1, 3,  "%lf%n%*1[dD]%*1[bB]%n"},
+    {0, 0,  ""}
+};
 
-    if ( NULL == (result = malloc (sizeof(char) * len + 1))) {
-        return NULL;
-    }
-    
-    sprintf(result, "%.*f %s", places, DB, units);
-
-    return result;
-}
-
-int decibel_sscanf(
-    char *str,
-    double *result
-) {
-
-    int nConv = 0;
-    int nChars = 0;
-    char mod[4];
-    
-
-    nConv = sscanf(str, "%lf%1[Dd]%1[Bb]", result, mod, mod+1);
-
-    if (nConv == 3 && 0 == strcasecmp("db", mod) ) {
-        return 1;
-    }
-
-    nConv = sscanf(str, "%lf%n", result, &nChars);
-
-    if (nConv == 1 && nChars == strlen(str)) {
-        return 1;
-    }
-
-    return 0;
-    
-}
 

@@ -36,7 +36,12 @@
 #include "capacitor.h"
 #include "inductor.h"
 #include "resister.h"
-#include "resister.h"
+#include "reactance.h"
+#include "match_network.h"
+#include "ohmslaw.h"
+#include "tank.h"
+#include "snr.h"
+#include "magloop.h"
 
 void help (char *argv0) {
     
@@ -45,7 +50,12 @@ void help (char *argv0) {
     printf("%s capacitor <calc> <calc args>\n", argv0);
     printf("%s inductor <calc> <calc args>\n", argv0);
     printf("%s resister <calc> <calc args>\n", argv0);
+    printf("%s reactance <calc> <calc args>\n", argv0);
     printf("%s match_network <calc> <calc args>\n", argv0);
+    printf("%s tank <calc> <calc args>\n", argv0);
+    printf("%s ohmslaw <calc> <calc args>\n", argv0);
+    printf("%s snr <calc> <calc args>\n", argv0);
+    printf("%s magloop <calc> <calc args>\n", argv0);
 
 }
 
@@ -62,22 +72,41 @@ int main (int argc, char *argv[]) {
         butterworth_parse(argc, argv);
     }
 
-    if (0 == strcasecmp(argv[1], "chebyshev") ) {
+    else if (0 == strcasecmp(argv[1], "chebyshev") ) {
         chebyshev_parse(argc, argv);
     }
 
-    if (0 == strcasecmp(argv[1], "capacitor") ) {
+    else if (0 == strcasecmp(argv[1], "capacitor") ) {
         capacitor_parse(argc, argv);
     }
-    if (0 == strcasecmp(argv[1], "inductor") ) {
+    else if (0 == strcasecmp(argv[1], "inductor") ) {
         inductor_parse(argc, argv);
     }
-    if (0 == strcasecmp(argv[1], "resister") ) {
+    else if (0 == strcasecmp(argv[1], "resister") ) {
         resister_parse(argc, argv);
     }
 
-    if (0 == strcasecmp(argv[1], "match_network") ) {
+    else if (0 == strcasecmp(argv[1], "reactance") ) {
+        reactance_parse(argc, argv);
+    }
+
+    else if (0 == strcasecmp(argv[1], "match_network") ) {
         match_network_parse(argc, argv);
+    }
+
+    else if (0 == strcasecmp(argv[1], "tank") ) {
+        tank_parse(argc, argv);
+    }
+
+     else if (0 == strcasecmp(argv[1], "ohmslaw") ) {
+        ohmslaw_parse(argc, argv);
+    }
+
+     else if (0 == strcasecmp(argv[1], "snr") ) {
+        snr_parse(argc, argv);
+    }
+     else if (0 == strcasecmp(argv[1], "magloop") ) {
+        magloop_parse(argc, argv);
     }
 
     else {

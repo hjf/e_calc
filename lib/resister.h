@@ -36,19 +36,21 @@
 #define RShunt_QX(Q, X) ((X)*(Q))
 
 
+
 double resister_parallel_calc(int count, double *values);
 
 double resister_series_calc(int count, double *values);
 
-char *resister_sprintf(
-    int places,
-    double value
-);
+#include "io.h"
 
-int resister_sscanf(
-    char *str,
-    double *result
-);
+extern const sprintf_t resister_sprintf_table[];
+
+#define resister_sprintf(places, value) io_sprintf((places), (value), resister_sprintf_table)
+
+extern const sscanf_t resister_sscanf_table[];
+
+#define resister_sscanf(str, result) io_sscanf((str), (result), resister_sscanf_table)
 
 #endif
+
 

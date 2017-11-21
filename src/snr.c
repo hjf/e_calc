@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * capacitor.c
+ * snr.c
  * 
  *
  *******************************************************************************
@@ -27,49 +27,80 @@
  * DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "capacitor.h"
+#include "lib/decibel.h"
 
-const sprintf_t capacitor_sprintf_table[] = {
-    {1e-9,  1e12,   "pF"},
-    {1e-6,  1e9,    "nF"},
-    {1e-3,  1e6,    "uF"},
-    {1,     1e3,    "mF"},
-    {-1,    1,      "F"},
-};
+#include "lib/snr.h"
 
-const sscanf_t capacitor_sscanf_table[] = {
-    {1e-12,  3, "%lf%n%*1[pP]%*1[fF]%n"},
-    {1e-9,   3, "%lf%n%*1[nN]%*1[fF]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[fF]%n"},
-    {1e-3,   3, "%lf%n%*1[mM]%*1[fF]%n"},
-    {1,      2, "%lf%n%1[fF]%n"},
-    {0,      0, ""}
-};
+void snr_printcalcs (void) {
 
-double capacitor_series_calc(int count, double *values) {
+    printf ("noise_figure\n");
 
-    double result = 0.0;
 
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += 1.0/values[i];
-    }
 
-    return 1.0/result;
 }
 
-double capacitor_parallel_calc(int count, double *values) {
+void snr_calchelp (char *calc) {
 
-    double result = 0.0;
-
-    int i;
-    for (i = 0 ; i < count ; i++) {
-        result += values[i];
+    if (0 == strcasecmp (calc, "noise_figure")) {
+        printf ("e_calc snr noise_figure <snr_in> <snr_out>\n");
     }
 
-    return result;
 }
+
+int snr_parse (int argc, char *argv[]) {
+
+    double snr_in;
+    double snr_out;
+    double nf;
+
+    char *value;
+
+    if (argc < 3) {
+        snr_printcalcs ();
+        exit (EXIT_FAILURE);
+    }
+
+    /***** noise_figure *****/
+
+    if (0 == strcasecmp (argv[2], "noise_figure")) {
+        if (argc != 5) {
+            snr_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        if (!decibel_sscanf (argv[3], &snr_in)) {
+            snr_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        else if (!decibel_sscanf (argv[4], &snr_out)) {
+            snr_calchelp (argv[2]);
+            exit (EXIT_FAILURE);
+        }
+
+        nf = snr_noise_figure_calc(&snr_in, &snr_out);
+
+        if (!(value = decibel_sprintf (4, nf))) {
+            exit (EXIT_FAILURE);
+        }
+
+        printf ("noise_figure = %s\n", value);
+        free(value);
+    }
+
+    else {
+        snr_printcalcs();
+        exit (EXIT_FAILURE);
+    }
+
+    return 1;
+}
+
+
+
+
 
 

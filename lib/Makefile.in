@@ -128,9 +128,10 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libe_calc_la_LIBADD =
-am_libe_calc_la_OBJECTS = butterworth.lo chebyshev.lo frequency.lo \
-	resister.lo decibel.lo capacitor.lo inductor.lo \
-	match_network.lo
+am_libe_calc_la_OBJECTS = butterworth.lo capacitor.lo chebyshev.lo \
+	current.lo decibel.lo distance.lo frequency.lo inductor.lo \
+	io.lo magloop.lo match_network.lo power.lo resister.lo snr.lo \
+	tank.lo voltage.lo
 libe_calc_la_OBJECTS = $(am_libe_calc_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -328,13 +329,21 @@ lib_LTLIBRARIES = \
 
 libe_calc_la_SOURCES = \
 	butterworth.c   \
-	chebyshev.c     \
-	frequency.c     \
-	resister.c      \
-	decibel.c       \
 	capacitor.c     \
+	chebyshev.c     \
+	current.c       \
+	decibel.c       \
+	distance.c      \
+	frequency.c     \
 	inductor.c      \
-	match_network.c
+	io.c            \
+	magloop.c       \
+	match_network.c \
+	power.c         \
+	resister.c      \
+	snr.c           \
+	tank.c          \
+    voltage.c
 
 all: all-am
 
@@ -417,11 +426,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/butterworth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capacitor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chebyshev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/current.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/decibel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distance.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frequency.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inductor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magloop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match_network.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/power.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tank.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/voltage.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -2,7 +2,7 @@
  *
  * Project: e_calc
  * 
- * inductor.c
+ * inductor.h
  * 
  *
  *******************************************************************************
@@ -30,16 +30,26 @@
 #ifndef INDUCTOR_H
 #define INDUCTOR_H
 
+#define Z_XlR(Xl, R) (sqrt((Xl * Xl) + (R * R)
+
 double inductor_parallel_calc(int count, double *values);
 
 double inductor_series_calc(int count, double *values);
 
-char *inductor_sprintf(int places, double value );
 
-int inductor_sscanf(
-    char *str,
-    double *result
-);
+#include "io.h"
+
+
+extern const sprintf_t inductor_sprintf_table[];
+
+#define inductor_sprintf(places, value) io_sprintf((places), (value), inductor_sprintf_table)
+
+extern const sscanf_t inductor_sscanf_table[];
+
+#define inductor_sscanf(str, result) io_sscanf((str), (result), inductor_sscanf_table)
+
+
+
 
 #endif
 

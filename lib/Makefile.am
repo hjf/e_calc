@@ -13,13 +13,19 @@ lib_LTLIBRARIES = \
 
 libe_calc_la_SOURCES = \
 	butterworth.c   \
-	chebyshev.c     \
-	frequency.c     \
-	resister.c      \
-	decibel.c       \
 	capacitor.c     \
+	chebyshev.c     \
+	current.c       \
+	decibel.c       \
+	distance.c      \
+	frequency.c     \
 	inductor.c      \
-	match_network.c
-
-
+	io.c            \
+	magloop.c       \
+	match_network.c \
+	power.c         \
+	resister.c      \
+	snr.c           \
+	tank.c          \
+    voltage.c
 

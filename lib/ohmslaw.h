@@ -28,26 +28,26 @@
 ******************************************************************************/
 
 
-#ifndef REACTANCE_H
-#define REACTANCE_H
+#ifndef OHMSLAW_H
+#define OHMSLAW_H
 
 #include <math.h>
 
-#define I_VR(V, R) ( (V)/(R) )
-#define I_PV(P, V) ( (P)/(V) )
+#define I_ER(E, R) ( (E)/(R) )
+#define I_PE(P, E) ( (P)/(E) )
 #define I_PR(P, R) ( sqrt((P)/(R)) )
 
-#define V_IR(I, R) ( (I)*(R) )
-#define V_PI(P, I) ( (P)/(I) )
-#define V_PR(P, R) ( sqrt((P)*(R)) )
+#define E_IR(I, R) ( (I)*(R) )
+#define E_PI(P, I) ( (P)/(I) )
+#define E_PR(P, R) ( sqrt((P)*(R)) )
 
-#define R_VI(V, I) ( (V)/(I) )
+#define R_EI(E, I) ( (E)/(I) )
 #define R_PI(P, I) ( (P)/(I)*(I) )
-#define R_VP(V, P) ( ((V)*(V))/P )
+#define R_EP(E, P) ( ((E)*(E))/P )
 
-#define P_VI(V, I) ( (V)*(I) )
+#define P_EI(E, I) ( (E)*(I) )
 #define P_RI(R, I) ( (R)*(I)*(I) )
-#define P_VI(V, R) ( ((V)*(V))/(R) )
+#define P_ER(E, R) ( ((E)*(E))/(R) )
 
 #endif
 

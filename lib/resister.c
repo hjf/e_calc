@@ -31,6 +31,33 @@
 #include <string.h>
 #include "resister.h"
 
+const sprintf_t resister_sprintf_table[] = {
+    {1e-6,  1e9,    "nOhms"},
+    {1e-3,  1e6,    "uOhms"},
+    {1,     1e3,    "mOhms"},
+    {1e3,   1,      "Ohms"},
+    {1e6,   1e-3,   "KOhms"},
+    {-1,    1e-6,   "MOhms"}
+};
+
+const sscanf_t resister_sscanf_table[] = {
+    {1e-9,   2, "%lf%n%*1[n]%n"},
+    {1e-6,   2, "%lf%n%*1[u]%n"},
+    {1e-3,   2, "%lf%n%*1[m]%n"},
+    {1,      1, "%lf%n%n"},
+    {1e3,    2, "%lf%n%*1[kK]%n"},
+    {1e6,    2, "%lf%n%*1[M]%n"},
+    {1e-3,   5, "%lf%n%*1[m]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%n"},
+    {1,      4, "%lf%n%*1[Oo]%n%*1[Hh]%n%*1[Mm]%n"},
+    {1e3,    5, "%lf%n%*1[kK]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%n"},
+    {1e6,    5, "%lf%n%*1[M]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%n"},
+    {1e-3,   6, "%lf%n%*1[m]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%*1[sS]%n"},
+    {1,      5, "%lf%n%*1[Oo]%n%*1[Hh]%n%*1[Mm]%*1[sS]%n"},
+    {1e3,    6, "%lf%n%*1[kK]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%*1[sS]%n"},
+    {1e6,    6, "%lf%n%*1[M]%*1[Oo]%n%*1[Hh]%n%*1[Mm]%*1[sS]%n"},
+    {0,      0, ""}
+};
+
 double resister_parallel_calc(int count, double *values) {
 
     double result = 0.0;
@@ -53,71 +80,5 @@ double resister_series_calc(int count, double *values) {
     }
 
     return result;
-}
-
-char *resister_sprintf(
-    int places,
-    double value
-) {
- 
-    char units[4] = {0};
-    double R = value; 
-    char *result = NULL;
-    
-    if (value < 1e3) {
-        strcpy( units, "");
-    }
-    else if (value < 1e6) {
-        strcpy( units, "K");
-        R*=1e-3;
-    }
-    else {
-        strcpy( units, "M");
-        R*=1e-6;
-    }
-
-    size_t len = snprintf(NULL, 0, "%.*f %s", places, R, units);
-
-    if ( NULL == (result = malloc (sizeof(char) * len + 1))) {
-        return NULL;
-    }
-    
-    sprintf(result, "%.*f %s", places, R, units);
-
-    return result;
-}
-
-int resister_sscanf(
-    char *str,
-    double *result
-) {
-
-    int nConv = 0;
-    int nChars = 0;
-    char mod[4];
-    
-
-    nConv = sscanf(str, "%lf%1[Kk]", result, mod);
-
-    if (nConv == 2 && 0 == strcasecmp("k", mod) ) {
-        (*result) *= 1e3;
-        return 1;
-    }
-
-    nConv = sscanf(str, "%lf%1[Mm]", result, mod);
-
-    if (nConv == 2 && 0 == strcasecmp("m", mod) ) {
-        (*result) *= 1e6;
-        return 1;
-    }
-
-    nConv = sscanf(str, "%lf%n", result, &nChars);
-
-    if (nConv == 1 && nChars == strlen(str)) {
-        return 1;
-    }
-
-    return 0;
-    
 }
 
