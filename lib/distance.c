@@ -31,8 +31,11 @@
 #include "distance.h"
 
 const sprintf_t distance_sprintf_table[] = {
-    {1e-3,  1e4,    "mm"},
-    {0,     1e3,    "cm"},
+    {1e-9,  1e12,   "pm"},
+    {1e-6,  1e9,    "nm"},
+    {1e-3,  1e6,    "um"},
+    {1e-2,  1e3,    "mm"},
+    {1,     1e2,    "cm"},
     {1e3,   1,      "m"},
     {1e6,   1e-3,   "Km"},
     {-1,    1e-6,   "Mm"}
