@@ -30,23 +30,17 @@
 #ifndef SKINEFFECT_H
 #define SKINEFFECT_H
 
-#include math.h
+#include <math.h>
+#include "permeability.h"
 
-/*******************************************************************************
+#define SKIN_R(FREQ, PERMEABILITY, CONDUCTIVITY)                            (sqrt(( M_PI * (FREQ) * PERMEABILITY_FS * (PERMEABILITY)) / (CONDUCTIVITY)))
 
-@param U            Permability of free space
-@param Ur           relative permibility of the conductor
-@param Conductivity Conductivity of the conductor
-@param Freq         Freq 
+#define SKIN_DEPTH_RAP(RESISTIVITY, ANGULARFREQ, PERMEABILITY)               (sqrt((2 * (RESISTIVITY)) / ((ANGULARFREQ) * PERMEABILITY_FS * (PERMEABILITY)))
 
-@return the skin effect resistance of the loop
-*******************************************************************************/
+#define SKIN_DEPTH_RFP(RESISTIVITY, FREQ, PERMEABILITY)               (sqrt((RESISTIVITY) / (M_PI * (FREQ) * PERMEABILITY_FS * (PERMEABILITY))))
 
-#define SKIN_R(U, Ur, Conductivity, Freq ) (sqrt(( M_PI * (Freq) *(U) * (Ur)) / (Conductivity)))
+#define SKIN_RESISTANCE_THICK(LENGTH, RESISTIVITY, DIAMETER, SKIN_DEPTH)    (((LENGTH) * (RESISTIVITY)) / (M_PI  * (DIAMETER) * (SKIN_DEPTH)))
 
-#define SKIN_DEPTH(FREQ, PERMABILITY, CONDUCTIVITY) (1 /M_PI * (FREQ) * (PERMABILITY) * (CONDUCTIVITY))
-
-   
 #endif
 
 
