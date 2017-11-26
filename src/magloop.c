@@ -297,6 +297,14 @@ int magloop_parse_circle(int argc, char *argv[]) {
                 free (value);
             }
 
+            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("SkinDepth = %s\n", value);
+                free (value);
+            }
+
             if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
                 exit (EXIT_FAILURE);
             }
@@ -515,6 +523,14 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
                 free (value);
             }
 
+            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("SkinDepth = %s\n", value);
+                free (value);
+            }
+
             if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
                 exit (EXIT_FAILURE);
             }
@@ -724,6 +740,14 @@ int magloop_parse_square(int argc, char *argv[]) {
             }
             else {
                 printf ("RadiationResistance = %s\n", value);
+                free (value);
+            }
+
+            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("SkinDepth = %s\n", value);
                 free (value);
             }
 
@@ -942,6 +966,14 @@ int magloop_parse_multisquare(int argc, char *argv[]) {
             }
             else {
                 printf ("RadiationResistance = %s\n", value);
+                free (value);
+            }
+
+            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("SkinDepth = %s\n", value);
                 free (value);
             }
 
