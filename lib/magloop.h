@@ -13,6 +13,7 @@
 typedef struct magloop_out_struct { 
     double Frequency;
     double RadiationResistance;
+    double SkinDepth;
     double RfResistanceLoss2;
     double Efficiency;
     double LoopInductance;
@@ -82,25 +83,6 @@ double CalcRadiationResistance(
     int isSquare,
     int NumLoops);
 
-/*******************************************************************************
-@brief Fuction to calculate rf loss resistance for skin effect
-
-@param Frequency
-@param RelativePermeabilityConductor
-@param Conductivity
-@param LoopCircumference
-@param LoopConductorCircumference
-
-@returns rf loss resistance for skin effect
-
-*******************************************************************************/
-
-double CalcSkinEffect(
-    double Frequency,
-    double RelativePermeabilityConductor,
-    double Conductivity,
-    double LoopCircumference,
-    double LoopConductorCircumference);
 
 /*******************************************************************************
 @brief Fuction to calculate combined rf loss resistance for skin effect and

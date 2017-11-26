@@ -30,11 +30,15 @@
 #ifndef FREQUENCY_H
 #define FREQUENCY_H
 
+#include <math.h>
 
 #define Fbw_FcutQ(Fcut, Q) ( (Fcut)/(Q) )
 #define Fcut_FbwQ(Fbw, Q) ( (Fbw)*(Q) )
 
 #define W_F(F) (300e6/(F) )
+
+#define ANGULARFREQ(F) (2 * M_PI * (F))
+
 #include "io.h"
 
 extern const sprintf_t frequency_sprintf_table[];

@@ -43,11 +43,10 @@
 
 #include"frequency.h"
 #include"reactance.h"
+#include"skineffect.h"
 #include"ohmslaw.h"
 #include"permeability.h"
 #include"magloop.h"
-
-
 
 
 /*******************************************************************************
@@ -77,15 +76,8 @@ magloop_out_t *magloop_single_calc (
     // rf loss resistance for skin effect
     double RfResistanceSkinEffect;
 
-    // reciprocal of the resistivity
-    // conductivity
-    double Conductivity;
-
     // radius of the loop conductor
     double LoopConductorRadius;
-
-    // circumference of the loop conductor
-    double LoopConductorCircumference;
 
     // diameter of the loop
     double LoopDiamater;
@@ -105,67 +97,81 @@ magloop_out_t *magloop_single_calc (
     // capacative reactance
     double Xc;
 
-    Conductivity=1/Resistivity;
-
     LoopConductorRadius=LoopConductorDiameter/2;
-    LoopConductorCircumference=M_PI*LoopConductorDiameter;
-
+    
     LoopDiamater=LoopCircumference/M_PI;
     LoopRadius=LoopDiamater/2;
     LoopArea=M_PI*SQUARED(LoopRadius);
 
     /**** alocate output space *****/
 
-    // fixme what if the step dont evenly divide
-    // we should just set the last freq to the upper limit    
-    
+    double lastFreq = 0;
+    size_t i = 0;
+
     Frequency=FrequencyLowLimit;
-    *nOuts = 0;
+    
     do {
-
+        lastFreq = Frequency; 
         Frequency=Frequency+FrequencyStep;
-        (*nOuts)++;
+        i++;
 
-    } while (Frequency < FrequencyHighLimit || Frequency == FrequencyHighLimit);
+    } while (Frequency <= FrequencyHighLimit && Frequency > lastFreq);
     
-    
+    /***** step might not divide evenly into the range *****/
+
+    if (Frequency > FrequencyHighLimit) {
+        i++;
+    }
+
+    *nOuts = i;
             
-    if (NULL == (result = malloc( (*nOuts + 1) * sizeof(magloop_out_t) ) ) ) {
+    if (NULL == (result = malloc( (i + 1) * sizeof(magloop_out_t) ) ) ) {
 
         //fixme pRINT AN ERROR?
         return NULL;
     }
 
-    for ( Frequency=FrequencyLowLimit, *nOuts = 0;
-          Frequency < FrequencyHighLimit || Frequency == FrequencyHighLimit;
-          Frequency=Frequency+FrequencyStep, (*nOuts)++
+    for ( i = 0, Frequency = FrequencyLowLimit;
+          i < *nOuts;
+          i++, Frequency = Frequency + FrequencyStep
     ) {
 
-        result[*nOuts].Frequency = Frequency;
+        /***** step might not divide evenly into the range *****/
 
-        result[*nOuts].LoopDiamater = LoopDiamater;
+        if (Frequency > FrequencyHighLimit) {
+            Frequency = FrequencyHighLimit;
+        }
+
+        result[i].Frequency = Frequency;
+
+        result[i].LoopDiamater = LoopDiamater;
         Wavelength=W_F(Frequency);
         
         // calculate the radiation resistance
-        result[*nOuts].RadiationResistance = CalcRadiationResistance(
+        result[i].RadiationResistance = CalcRadiationResistance(
             LoopArea,
             Wavelength,
             isSquare,
             1);
+        
+        // skin effect
 
-        // add skin effect to RfResistanceLoss
-        RfResistanceSkinEffect = CalcSkinEffect(
+        result[i].SkinDepth = SKIN_DEPTH_RFP(
+            Resistivity,
             Frequency,
-            RelativePermeabilityConductor,
-            Conductivity,
+            RelativePermeabilityConductor);
+
+        RfResistanceSkinEffect = SKIN_RESISTANCE_THICK (
             LoopCircumference,
-            LoopConductorCircumference);
+            Resistivity,
+            LoopConductorDiameter,
+            result[i].SkinDepth);
 
         // the rf resistance loss decreases as
         // the number of loops increase.
         // in this case 1 loop only
 
-        result[*nOuts].RfResistanceLoss2=RfResistanceSkinEffect;
+        result[i].RfResistanceLoss2=RfResistanceSkinEffect;
 
         //RfResistanceLoss2=RfResistanceSkinEffect/NumLoops;
 
@@ -173,7 +179,7 @@ magloop_out_t *magloop_single_calc (
         /*
         // if more than one loop is present, estimate the proximity effect
         if (NumLoops > 1)    
-            result[*nOuts].RfResistanceLoss2 = CalcProximity(
+            result[i].RfResistanceLoss2 = CalcProximity(
                 RfResistanceSkinEffect,
                 LoopCircumference,
                 NumLoops);
@@ -181,14 +187,14 @@ magloop_out_t *magloop_single_calc (
         */
 
         // calculate the efficiency of the loop
-        result[*nOuts].Efficiency = CalcEfficiency(
-            result[*nOuts].RadiationResistance,
-            result[*nOuts].RfResistanceLoss2);
+        result[i].Efficiency = CalcEfficiency(
+            result[i].RadiationResistance,
+            result[i].RfResistanceLoss2);
 
         // calculate the inductance of the loop
 
         if (!isSquare) {
-            result[*nOuts].LoopInductance = CalcLoopInductance(
+            result[i].LoopInductance = CalcLoopInductance(
                 LoopRadius,
                 RelativePermeabilityConductor,
                 LoopConductorRadius,
@@ -196,7 +202,7 @@ magloop_out_t *magloop_single_calc (
                 K*/);
         }
         else {
-            result[*nOuts].LoopInductance = CalcSquareLoopInductance(
+            result[i].LoopInductance = CalcSquareLoopInductance(
                 LoopDiamater,
                 RelativePermeabilityConductor,
                 LoopConductorRadius,
@@ -207,37 +213,37 @@ magloop_out_t *magloop_single_calc (
         // calculate the reactance of the loop
         // as well as series input impedance
 
-        result[*nOuts].Xl= XL(
+        result[i].Xl= XL(
             Frequency,
-            result[*nOuts].LoopInductance
+            result[i].LoopInductance
         );
 
-        result[*nOuts].LoopSeriesImpedance=sqrt(
-            result[*nOuts].RadiationResistance
-            + result[*nOuts].RfResistanceLoss2
+        result[i].LoopSeriesImpedance=sqrt(
+            result[i].RadiationResistance
+            + result[i].RfResistanceLoss2
         );
 
-        Xc=result[*nOuts].Xl;
+        Xc=result[i].Xl;
 
-        result[*nOuts].C = C_XcF(Xc, Frequency);
+        result[i].C = C_XcF(Xc, Frequency);
 
-        result[*nOuts].Q=result[*nOuts].Xl
-                        / (2*(    result[*nOuts].RadiationResistance
-                                + result[*nOuts].RfResistanceLoss2));
+        result[i].Q=result[i].Xl
+                        / (2*(    result[i].RadiationResistance
+                                + result[i].RfResistanceLoss2));
 
-        result[*nOuts].SixDbBandwidth = Fbw_FcutQ(Frequency, result[*nOuts].Q);
+        result[i].SixDbBandwidth = Fbw_FcutQ(Frequency, result[i].Q);
 
-        result[*nOuts].SwrBandwidth=2*(result[*nOuts].SixDbBandwidth/(3/0.512));
-        result[*nOuts].LcDynamicResistance=result[*nOuts].Xl*result[*nOuts].Q;
+        result[i].SwrBandwidth=2*(result[i].SixDbBandwidth/(3/0.512));
+        result[i].LcDynamicResistance=result[i].Xl*result[i].Q;
         
-        result[*nOuts].VMAX = E_PR(TxPower, result[*nOuts].LcDynamicResistance);
+        result[i].VMAX = E_PR(TxPower, result[i].LcDynamicResistance);
 
         // calculate the area  of the small coupling loop
         // fixme this should be an input
         double Zin=50.0;
-        result[*nOuts].PickupLoopArea = CalcPickupLoopArea(
+        result[i].PickupLoopArea = CalcPickupLoopArea(
             LoopArea,
-            result[*nOuts].LoopSeriesImpedance,
+            result[i].LoopSeriesImpedance,
             Zin);
 
 
@@ -271,15 +277,8 @@ magloop_out_t *magloop_multi_calc (
     // rf loss resistance for skin effect
     double RfResistanceSkinEffect;
 
-    // reciprocal of the resistivity
-    // conductivity
-    double Conductivity;
-
     // radius of the loop conductor
     double LoopConductorRadius;
-
-    // circumference of the loop conductor
-    double LoopConductorCircumference;
 
     // diameter of the loop
     double LoopDiamater;
@@ -299,61 +298,75 @@ magloop_out_t *magloop_multi_calc (
     // capacative reactance
     double Xc;
 
-    Conductivity=1/Resistivity;
-
     LoopConductorRadius=LoopConductorDiameter/2;
-    LoopConductorCircumference=M_PI*LoopConductorDiameter;
-
+    
     LoopDiamater=LoopCircumference/M_PI;
     LoopRadius=LoopDiamater/2;
     LoopArea=M_PI*SQUARED(LoopRadius);
 
     /**** alocate output space *****/
 
-    // fixme what if the step dont evenly divide
-    // we should just set the last freq to the upper limit    
-    
+    double lastFreq = 0;
+    size_t i = 0;
+
     Frequency=FrequencyLowLimit;
-    *nOuts = 0;
+    
     do {
-
+        lastFreq = Frequency; 
         Frequency=Frequency+FrequencyStep;
-        (*nOuts)++;
+        i++;
 
-    } while (Frequency < FrequencyHighLimit || Frequency == FrequencyHighLimit);
+    } while (Frequency <= FrequencyHighLimit && Frequency > lastFreq);
     
-    
+    /***** step might not divide evenly into the range *****/
+
+    if (Frequency > FrequencyHighLimit) {
+        i++;
+    }
+
+    *nOuts = i;
             
-    if (NULL == (result = malloc( (*nOuts + 1) * sizeof(magloop_out_t) ) ) ) {
+    if (NULL == (result = malloc( (i + 1) * sizeof(magloop_out_t) ) ) ) {
 
         //fixme pRINT AN ERROR?
         return NULL;
     }
 
-    for ( Frequency=FrequencyLowLimit, *nOuts = 0;
-          Frequency < FrequencyHighLimit || Frequency == FrequencyHighLimit;
-          Frequency=Frequency+FrequencyStep, (*nOuts)++
+    for ( i = 0, Frequency = FrequencyLowLimit;
+          i < *nOuts;
+          i++, Frequency = Frequency + FrequencyStep
     ) {
 
-        result[*nOuts].Frequency = Frequency;
+        /***** step might not divide evenly into the range *****/
 
-        result[*nOuts].LoopDiamater = LoopDiamater;
-        Wavelength=W_F(Frequency);
+        if (Frequency > FrequencyHighLimit) {
+            Frequency = FrequencyHighLimit;
+        }
+
+        result[i].Frequency = Frequency;
+
+        result[i].LoopDiamater = LoopDiamater;
+        Wavelength = W_F(Frequency);
         
         // calculate the radiation resistance
-        result[*nOuts].RadiationResistance = CalcRadiationResistance(
+        result[i].RadiationResistance = CalcRadiationResistance(
             LoopArea,
             Wavelength,
             isSquare,
             nLoops);
 
-        // add skin effect to RfResistanceLoss
-        RfResistanceSkinEffect = CalcSkinEffect(
+        // skin effect
+
+        result[i].SkinDepth = SKIN_DEPTH_RFP(
+            Resistivity,
             Frequency,
-            RelativePermeabilityConductor,
-            Conductivity,
+            RelativePermeabilityConductor);
+
+        RfResistanceSkinEffect = SKIN_RESISTANCE_THICK (
             LoopCircumference,
-            LoopConductorCircumference);
+            Resistivity,
+            LoopConductorDiameter,
+            result[i].SkinDepth);
 
         // the rf resistance loss decreases as
         // the number of loops increase.
@@ -362,7 +375,7 @@ magloop_out_t *magloop_multi_calc (
 
         // if more than one loop is present, estimate the proximity effect
         if (nLoops > 1) {
-            result[*nOuts].RfResistanceLoss2 = CalcProximity(
+            result[i].RfResistanceLoss2 = CalcProximity(
                 RfResistanceSkinEffect,
                 LoopCircumference,
                 nLoops);
@@ -370,14 +383,14 @@ magloop_out_t *magloop_multi_calc (
         
 
         // calculate the efficiency of the loop
-        result[*nOuts].Efficiency = CalcEfficiency(
-            result[*nOuts].RadiationResistance,
-            result[*nOuts].RfResistanceLoss2);
+        result[i].Efficiency = CalcEfficiency(
+            result[i].RadiationResistance,
+            result[i].RfResistanceLoss2);
 
         // calculate the inductance of the loop
 
         if (!isSquare) {
-            result[*nOuts].LoopInductance = CalcLoopInductance(
+            result[i].LoopInductance = CalcLoopInductance(
                 LoopRadius,
                 RelativePermeabilityConductor,
                 LoopConductorRadius,
@@ -385,7 +398,7 @@ magloop_out_t *magloop_multi_calc (
                 K*/);
         }
         else {
-            result[*nOuts].LoopInductance = CalcSquareLoopInductance(
+            result[i].LoopInductance = CalcSquareLoopInductance(
                 LoopDiamater,
                 RelativePermeabilityConductor,
                 LoopConductorRadius,
@@ -396,37 +409,38 @@ magloop_out_t *magloop_multi_calc (
         // calculate the reactance of the loop
         // as well as series input impedance
 
-        result[*nOuts].Xl= XL(
+        result[i].Xl= XL(
             Frequency,
-            result[*nOuts].LoopInductance
+            result[i].LoopInductance
         );
 
-        result[*nOuts].LoopSeriesImpedance=sqrt(
-            result[*nOuts].RadiationResistance
-            + result[*nOuts].RfResistanceLoss2
+        result[i].LoopSeriesImpedance=sqrt(
+            result[i].RadiationResistance
+            + result[i].RfResistanceLoss2
         );
 
-        Xc=result[*nOuts].Xl;
+        Xc=result[i].Xl;
 
-        result[*nOuts].C = C_XcF(Xc, Frequency);
+        result[i].C = C_XcF(Xc, Frequency);
 
-        result[*nOuts].Q=result[*nOuts].Xl
-                        / (2*(    result[*nOuts].RadiationResistance
-                                + result[*nOuts].RfResistanceLoss2));
+        result[i].Q=result[i].Xl
+                        / (2*(    result[i].RadiationResistance
+                                + result[i].RfResistanceLoss2));
 
-        result[*nOuts].SixDbBandwidth = Fbw_FcutQ(Frequency, result[*nOuts].Q);
+        result[i].SixDbBandwidth = Fbw_FcutQ(Frequency, result[i].Q);
 
-        result[*nOuts].SwrBandwidth=2*(result[*nOuts].SixDbBandwidth/(3/0.512));
-        result[*nOuts].LcDynamicResistance=result[*nOuts].Xl*result[*nOuts].Q;
+        result[i].SwrBandwidth=2*(result[i].SixDbBandwidth/(3/0.512));
+        result[i].LcDynamicResistance=result[i].Xl*result[i].Q;
         
-        result[*nOuts].VMAX = E_PR(TxPower, result[*nOuts].LcDynamicResistance);
+        result[i].VMAX = E_PR(TxPower, result[i].LcDynamicResistance);
 
         // calculate the area  of the small coupling loop
         // fixme this should be an input
+
         double Zin=50.0;
-        result[*nOuts].PickupLoopArea = CalcPickupLoopArea(
+        result[i].PickupLoopArea = CalcPickupLoopArea(
             LoopArea,
-            result[*nOuts].LoopSeriesImpedance,
+            result[i].LoopSeriesImpedance,
             Zin);
 
 
@@ -480,42 +494,7 @@ double CalcRadiationResistance(
     return RadiationResistance;
 }
 
-/*******************************************************************************
-@brief Fuction to calculate rf loss resistance for skin effect
 
-@param Frequency,
-@param RelativePermeabilityConductor,
-@param Conductivity,
-@param LoopCircumference,
-@param LoopConductorCircumference);
-
-@returns rf loss resistance for skin effect
-
-*******************************************************************************/
-
-double CalcSkinEffect(
-    double Frequency,
-    double RelativePermeabilityConductor,
-    double Conductivity,
-    double LoopCircumference,
-    double LoopConductorCircumference)
-{
-
-    double ResistivitySkinEffect;
-    double RfResistanceSkinEffect;
-
-    // This is the standard model for skin effect
-    //
-    ResistivitySkinEffect = sqrt((    M_PI
-                                    * Frequency
-                                    * PERMEABILITY_FS 
-                                    * RelativePermeabilityConductor
-                                 ) / Conductivity);
-
-    RfResistanceSkinEffect=(LoopCircumference/LoopConductorCircumference)*ResistivitySkinEffect;
-
-    return RfResistanceSkinEffect;
-}
 
 /*******************************************************************************
 @brief Fuction to calculate combined rf loss resistance for skin effect and
@@ -620,6 +599,42 @@ double CalcLoopInductance(
 
     return LoopInductance;
 }
+
+
+
+/*
+
+mutual inductance
+
+M is the mutual inductance
+N1 is the number of turns on the first inductor
+N2 = number of turns on the second inductor
+P is the permeance of the space occupied by the flux.
+
+M = N1 * N2 * P 
+
+so that means in our case....
+M = P
+
+coupling coefficient
+
+K coupling coefficient
+m mutual inductance
+L1 inductance of first inductor
+L2 inductance of second inductor
+
+M= k * sqrt ( L1 * l2)
+
+or in our case calc the impedance of a single loop?
+
+M = K * Lsingle
+
+ i assume that...
+M = K * cuberoot(L1 * L2 * L3)
+
+
+*/
+
 
 /*******************************************************************************
 @brief Fuction to calculate square loop Inductance

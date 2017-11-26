@@ -42,7 +42,7 @@ const sprintf_t inductor_sprintf_table[] = {
 const sscanf_t inductor_sscanf_table[] = {
     {1e-12,  3, "%lf%n%*1[pP]%*1[hH]%n"},
     {1e-9,   3, "%lf%n%*1[nN]%*1[hH]%n"},
-    {1e-6,   2, "%lf%n%*1[uU]%*1[hH]%n"},
+    {1e-6,   3, "%lf%n%*1[uU]%*1[hH]%n"},
     {1e-3,   3, "%lf%n%*1[mM]%*1[hH]%n"},
     {1,      2, "%lf%n%*1[hH]%n"},
     {0,      0, ""}
