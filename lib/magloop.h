@@ -33,24 +33,7 @@ typedef struct magloop_out_struct {
 single loop calc
 *******************************************************************************/
 
-magloop_out_t *magloop_single_calc (
-    double LoopCircumference,
-    double LoopConductorDiameter,
-    double Resistivity,
-    double RelativePermeabilityConductor,
-    /*double K,*/
-    double TxPower,
-    double FrequencyLowLimit,
-    double FrequencyHighLimit,
-    double FrequencyStep,
-    int isSquare,
-    size_t *nOuts);
-
-/*******************************************************************************
-multi loop calc
-*******************************************************************************/
-
-magloop_out_t *magloop_multi_calc (
+magloop_out_t *magloop_calc (
     double LoopCircumference,
     double LoopConductorDiameter,
     double Resistivity,
@@ -71,7 +54,7 @@ magloop_out_t *magloop_multi_calc (
 @param LoopArea     area of the loop
 @param Wavelength
 @param isSquare     non zero if the loop is square
-@param NumLoops     number of parallel loops
+@param nLoops     number of parallel loops
 @param NumTurns     number of turns in a multiturn loop
 @returns radiation resistance
 
@@ -81,7 +64,7 @@ double CalcRadiationResistance(
     double LoopArea,
     double Wavelength,
     int isSquare,
-    int NumLoops,
+    int nLoops,
     int NumTurns);
 
 
@@ -91,7 +74,7 @@ double CalcRadiationResistance(
 
 @param RfResistanceSkinEffect   rf loss resistance for skin effect
 @param LoopCircumference        circumference of the loop
-@param NumLoops                 number of paralell loops
+@param nLoops                 number of paralell loops
 
 @returns rf loss resistance for skin effect and proximity effect
 
@@ -100,7 +83,7 @@ double CalcRadiationResistance(
 double CalcProximity(
     double RfResistanceSkinEffect,
     double LoopCircumference,
-    double NumLoops);
+    double nLoops);
 
 /*******************************************************************************
 @brief Fuction to calculate loop Efficiency
@@ -123,7 +106,7 @@ double CalcEfficiency(
 @param LoopRadius                       radius of the loop
 @param RelativePermeabilityConductor    relative permeability of the conductor
 @param LoopConductorRadius              radius of the loop conductor
-@param NumLoops                         number of paralell loops
+@param nLoops                         number of paralell loops
 @param K                                coefficient of coupling
 
 @returns loop inductance
@@ -134,7 +117,7 @@ double CalcLoopInductance(
     double LoopRadius,
     double RelativePermeabilityConductor,
     double LoopConductorRadius,
-    double NumLoops/*,
+    double nLoops/*,
     double K*/);
 
 /*******************************************************************************
@@ -143,7 +126,7 @@ double CalcLoopInductance(
 @param LoopDiamater                     diameter of the loop
 @param RelativePermeabilityConductor    relative permeability of the conductor
 @param LoopConductorRadius              radius of the loop conductor
-@param NumLoops                         number of paralell loops
+@param nLoops                         number of paralell loops
 @param K                                coefficient of coupling
 
 
@@ -155,7 +138,7 @@ double CalcSquareLoopInductance(
     double LoopDiamater,
     double RelativePermeabilityConductor,
     double LoopConductorRadius,
-    double NumLoops/*,
+    double nLoops/*,
     double K*/);
 
 /*******************************************************************************
@@ -287,7 +270,7 @@ double LoopSeriesImpedance;
 double PickupLoopArea;
 
 // number of paralell loops
-double NumLoops;
+double nLoops;
 
 // coefficient of coupling
 double K;

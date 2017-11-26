@@ -258,7 +258,7 @@ int magloop_parse_circle(int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
     
-    if (!(result = magloop_single_calc (
+    if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
                 Resistivity,
@@ -268,6 +268,7 @@ int magloop_parse_circle(int argc, char *argv[]) {
                 FrequencyHighLimit,
                 FrequencyStep,
                 0,
+                1,
                 &nOuts))
     ) {
         magloop_calchelp ("circle");
@@ -483,7 +484,7 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
 
-    if (!(result = magloop_multi_calc (
+    if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
                 Resistivity,
@@ -704,7 +705,7 @@ int magloop_parse_square(int argc, char *argv[]) {
     }
     
 
-    if (!(result = magloop_single_calc (
+    if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
                 Resistivity,
@@ -713,6 +714,7 @@ int magloop_parse_square(int argc, char *argv[]) {
                 FrequencyLowLimit,
                 FrequencyHighLimit,
                 FrequencyStep,
+                1,
                 1,
                 &nOuts))
     ) {
@@ -929,7 +931,7 @@ int magloop_parse_multisquare(int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
 
-    if (!(result = magloop_multi_calc (
+    if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
                 Resistivity,
