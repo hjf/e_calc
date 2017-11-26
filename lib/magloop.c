@@ -153,7 +153,7 @@ magloop_out_t *magloop_calc (
             LoopArea,
             Wavelength,
             isSquare,
-            1,
+            nLoops,
             1);
         
         // skin effect
