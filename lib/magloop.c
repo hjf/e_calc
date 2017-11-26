@@ -152,6 +152,7 @@ magloop_out_t *magloop_single_calc (
             LoopArea,
             Wavelength,
             isSquare,
+            1,
             1);
         
         // skin effect
@@ -353,7 +354,8 @@ magloop_out_t *magloop_multi_calc (
             LoopArea,
             Wavelength,
             isSquare,
-            nLoops);
+            nLoops,
+            1);
 
         // skin effect
 
@@ -466,18 +468,22 @@ double CalcRadiationResistance(
     double LoopArea,
     double Wavelength,
     int isSquare,
-    int NumLoops)
+    int NumLoops,
+    int NumTurns)
 {
 
     double RadiationResistance;
 
+    
     // radiation resistance for a single loop
     // This is the favored model for radiation resistance in a loop
     // It is problematic in that it is an approximation, and it is not 
     // correct in the case of a square loop.
-     
-    RadiationResistance =     31171
-                            * (SQUARED(LoopArea)/FOURTH(Wavelength));
+    
+    double n = 120 * M_PI; // this is in ohms but what is it, and is it correct?
+
+    RadiationResistance =     n * (8/3) * CUBED(M_PI)
+                            * SQUARED(NumTurns * (LoopArea/SQUARED(Wavelength)));
 
     // It turns out that the radiation resistance for a round loop
     // is very close to 1.621 times greater than that of a square loop.

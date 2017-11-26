@@ -72,7 +72,7 @@ magloop_out_t *magloop_multi_calc (
 @param Wavelength
 @param isSquare     non zero if the loop is square
 @param NumLoops     number of parallel loops
-
+@param NumTurns     number of turns in a multiturn loop
 @returns radiation resistance
 
 *******************************************************************************/
@@ -81,7 +81,8 @@ double CalcRadiationResistance(
     double LoopArea,
     double Wavelength,
     int isSquare,
-    int NumLoops);
+    int NumLoops,
+    int NumTurns);
 
 
 /*******************************************************************************
