@@ -42,6 +42,7 @@
 #include "tank.h"
 #include "snr.h"
 #include "magloop.h"
+#include "smith.h"
 
 void help (char *argv0) {
     
@@ -56,6 +57,7 @@ void help (char *argv0) {
     printf("%s ohmslaw <calc> <calc args>\n", argv0);
     printf("%s snr <calc> <calc args>\n", argv0);
     printf("%s magloop <calc> <calc args>\n", argv0);
+    printf("%s smith <calc> <calc args>\n", argv0);
 
 }
 
@@ -107,6 +109,10 @@ int main (int argc, char *argv[]) {
     }
      else if (0 == strcasecmp(argv[1], "magloop") ) {
         magloop_parse(argc, argv);
+    }
+
+     else if (0 == strcasecmp(argv[1], "smith") ) {
+        smith_parse(argc, argv);
     }
 
     else {

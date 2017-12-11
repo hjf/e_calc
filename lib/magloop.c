@@ -47,6 +47,7 @@
 #include"ohmslaw.h"
 #include"permeability.h"
 #include"magloop.h"
+#include"smith.h"
 
 
 /*******************************************************************************
@@ -55,11 +56,17 @@
 *******************************************************************************/
 // coefficient of coupling
 
-#define K 0.427139
+/* this cant be solved for */
+#define K 0.5
+
+/* num harmonics for Smiths prox calc */
+#define NHARMONICS 12
+
 
 magloop_out_t *magloop_calc (
     double LoopCircumference,
     double LoopConductorDiameter,
+    double LoopConductorSpacing,
     double Resistivity,
     double RelativePermeabilityConductor,
     /*double K,*/
@@ -98,12 +105,21 @@ magloop_out_t *magloop_calc (
     // capacative reactance
     double Xc;
 
+    if(isSquare) {
+        LoopDiamater = LoopCircumference / 4;
+        LoopRadius = LoopDiamater / 2;
+        LoopArea = LoopDiamater * LoopDiamater;
+    }
+
+    else {
+        LoopDiamater = LoopCircumference / M_PI;
+        LoopRadius = LoopDiamater / 2;
+        LoopArea = M_PI * SQUARED(LoopRadius);
+    
+    }
+
     LoopConductorRadius=LoopConductorDiameter/2;
     
-    LoopDiamater=LoopCircumference/M_PI;
-    LoopRadius=LoopDiamater/2;
-    LoopArea=M_PI*SQUARED(LoopRadius);
-
     /**** alocate output space *****/
 
     double lastFreq = 0;
@@ -113,7 +129,7 @@ magloop_out_t *magloop_calc (
     
     do {
         lastFreq = Frequency; 
-        Frequency=Frequency+FrequencyStep;
+        Frequency = Frequency + FrequencyStep;
         i++;
 
     } while (Frequency <= FrequencyHighLimit && Frequency > lastFreq);
@@ -146,8 +162,22 @@ magloop_out_t *magloop_calc (
         result[i].Frequency = Frequency;
 
         result[i].LoopDiamater = LoopDiamater;
+
         Wavelength=W_F(Frequency);
         
+        /***** check some known limits on loop size *****/
+
+        result[i].CircCheck = 0;
+        if (LoopCircumference < Wavelength / 3) {
+            result[i].CircCheck = 1;
+        }
+
+        result[i].RadiusCheck = 0;
+        if (LoopRadius < Wavelength / (6 * M_PI)) {
+            result[i].RadiusCheck = 1;
+        }
+
+                  
         // calculate the radiation resistance
         result[i].RadiationResistance = CalcRadiationResistance(
             LoopArea,
@@ -186,6 +216,8 @@ magloop_out_t *magloop_calc (
             result[i].RfResistanceLoss2 = CalcProximity(
                 RfResistanceSkinEffect,
                 LoopCircumference,
+                LoopConductorDiameter,
+                LoopConductorSpacing,
                 nLoops);
         }
 
@@ -249,8 +281,10 @@ magloop_out_t *magloop_calc (
         result[i].VMAX = E_PR(TxPower, result[i].LcDynamicResistance);
 
         // calculate the area  of the small coupling loop
-        // fixme this should be an input
+
+        //FIXME this should be an input
         double Zin=50.0;
+
         result[i].PickupLoopArea = CalcPickupLoopArea(
             LoopArea,
             result[i].LoopSeriesImpedance,
@@ -282,7 +316,6 @@ double CalcRadiationResistance(
     int nLoops,
     int nTurns)
 {
-
     double RadiationResistance;
 
     
@@ -299,19 +332,20 @@ double CalcRadiationResistance(
                             * SQUARED(nTurns * (LoopArea/SQUARED(Wavelength)));
     */
 
-    RadiationResistance = 31171 * (SQUARED(LoopArea)/FOURTH(Wavelength));
+    RadiationResistance = 31171 * ( SQUARED(LoopArea) / FOURTH(Wavelength) );
 
     // It turns out that the radiation resistance for a round loop
     // is very close to 1.621 times greater than that of a square loop.
     //
     // correction for a square loop
     if (isSquare) {
-        RadiationResistance=RadiationResistance/1.621;
+        RadiationResistance = RadiationResistance / 1.621;
     }
+
     // radiation resistance increases directly with the 
     // the number of parallel loops
     // so we need to adjust it.
-    RadiationResistance = RadiationResistance*nLoops;
+    RadiationResistance = RadiationResistance * nLoops;
 
     return RadiationResistance;
 }
@@ -333,6 +367,8 @@ double CalcRadiationResistance(
 double CalcProximity(
     double RfResistanceSkinEffect,
     double LoopCircumference,
+    double LoopConductorDiameter,
+    double LoopConductorSpacing,
     double nLoops)
 {
     double Ro;
@@ -352,10 +388,20 @@ double CalcProximity(
     // Yes. Yet another approximation.
     // Boldly assuming that the increase in proximity
     // effect is close to nLoops cubed!
-    Rpo=0.003*nLoops*nLoops*nLoops;
-    //Rpo=1;
+    //Rpo=0.003*nLoops*nLoops*nLoops;
+
+    // try Smiths code
+
+    Rpo = SmithParallelLeastSquares(
+        nLoops,
+        NHARMONICS,
+        LoopConductorDiameter,
+        LoopConductorSpacing
+    );
 
     Rp=Ro*Rpo;
+    printf("Rp %.12lf Ro %.12lf Rpo %.12lf\n", Rp, Ro, Rpo);
+    
 
     RfResistanceLoss2=(Rp+Ro)*LoopCircumference;
 
@@ -385,7 +431,28 @@ double CalcEfficiency(
 
     return Efficiency;
 }
+/*
+double CalcEfficiency_Smith(
+    double LoopRadius,
+    double LoopConductorRadius,
+    double Frequency,
+    double Conductivity,
+    double nLoops,
+    double Rp,
+    double Ro
+{
+    double Efficiency;
 
+    Efficiency =
+        1/ (1 + (   (8.48 * pow(10, -10) * sqrt((Frequency /1e6) * Conductivity))
+                  / (n* CUBED(LoopRadius) * LoopConductorRadius)
+                ) 
+              * ( 1 + (Rp/Ro))
+           );
+    
+    return Efficiency;
+}
+*/
 /*******************************************************************************
 @brief Fuction to calculate loop Inductance
 

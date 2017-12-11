@@ -25,6 +25,7 @@ libe_calc_la_SOURCES = \
 	match_network.c \
 	power.c         \
 	resister.c      \
+	smith.c         \
 	snr.c           \
 	tank.c          \
     voltage.c

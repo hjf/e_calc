@@ -130,8 +130,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libe_calc_la_LIBADD =
 am_libe_calc_la_OBJECTS = butterworth.lo capacitor.lo chebyshev.lo \
 	current.lo decibel.lo distance.lo frequency.lo inductor.lo \
-	io.lo magloop.lo match_network.lo power.lo resister.lo snr.lo \
-	tank.lo voltage.lo
+	io.lo magloop.lo match_network.lo power.lo resister.lo \
+	smith.lo snr.lo tank.lo voltage.lo
 libe_calc_la_OBJECTS = $(am_libe_calc_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -341,6 +341,7 @@ libe_calc_la_SOURCES = \
 	match_network.c \
 	power.c         \
 	resister.c      \
+	smith.c         \
 	snr.c           \
 	tank.c          \
     voltage.c
@@ -436,6 +437,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match_network.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/power.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smith.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tank.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/voltage.Plo@am__quote@

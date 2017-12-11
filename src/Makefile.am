@@ -19,18 +19,19 @@ bin_PROGRAMS = \
 	e_calc
 
 e_calc_SOURCES = \
-	e_calc.c        \
 	butterworth.c   \
 	chebyshev.c     \
 	capacitor.c     \
+	e_calc.c        \
 	inductor.c      \
-	resister.c      \
-	reactance.c      \
-	ohmslaw.c      \
+	ohmslaw.c       \
+	magloop.c       \
 	match_network.c \
-	tank.c           \
-	magloop.c           \
-    snr.c
+	reactance.c     \
+	resister.c      \
+    snr.c           \
+    smith.c         \
+	tank.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \

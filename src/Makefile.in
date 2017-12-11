@@ -101,11 +101,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_e_calc_OBJECTS = e_calc.$(OBJEXT) butterworth.$(OBJEXT) \
-	chebyshev.$(OBJEXT) capacitor.$(OBJEXT) inductor.$(OBJEXT) \
-	resister.$(OBJEXT) reactance.$(OBJEXT) ohmslaw.$(OBJEXT) \
-	match_network.$(OBJEXT) tank.$(OBJEXT) magloop.$(OBJEXT) \
-	snr.$(OBJEXT)
+am_e_calc_OBJECTS = butterworth.$(OBJEXT) chebyshev.$(OBJEXT) \
+	capacitor.$(OBJEXT) e_calc.$(OBJEXT) inductor.$(OBJEXT) \
+	ohmslaw.$(OBJEXT) magloop.$(OBJEXT) match_network.$(OBJEXT) \
+	reactance.$(OBJEXT) resister.$(OBJEXT) snr.$(OBJEXT) \
+	smith.$(OBJEXT) tank.$(OBJEXT)
 e_calc_OBJECTS = $(am_e_calc_OBJECTS)
 e_calc_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -305,18 +305,19 @@ AM_CFLAGS = \
 	 -g
 
 e_calc_SOURCES = \
-	e_calc.c        \
 	butterworth.c   \
 	chebyshev.c     \
 	capacitor.c     \
+	e_calc.c        \
 	inductor.c      \
-	resister.c      \
-	reactance.c      \
-	ohmslaw.c      \
+	ohmslaw.c       \
+	magloop.c       \
 	match_network.c \
-	tank.c           \
-	magloop.c           \
-    snr.c
+	reactance.c     \
+	resister.c      \
+    snr.c           \
+    smith.c         \
+	tank.c
 
 e_calc_LDFLAGS = \
 	-L../lib/.libs \
@@ -426,6 +427,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ohmslaw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reactance.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resister.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smith.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tank.Po@am__quote@
 

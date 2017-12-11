@@ -85,6 +85,7 @@ void magloop_calchelp (char *calc) {
         printf ("e_calc magloop multicircle \n");
         printf ("   <LOOP CIRCUMFERENCE> \n");
         printf ("   <CONDUCTOR DIAMETER> \n");
+        printf ("   <CONDUCTOR SPACING> \n");
         printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
         printf ("       Resistivity of aluminum 37nOhms\n");
         printf ("       Resistivity of copper 16.8nOhms\n");
@@ -120,6 +121,7 @@ void magloop_calchelp (char *calc) {
         printf ("e_calc magloop multisquare \n");
         printf ("   <LOOP CIRCUMFERENCE> \n");
         printf ("   <CONDUCTOR DIAMETER> \n");
+        printf ("   <CONDUCTOR SPACING> \n");
         printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
         printf ("       Resistivity of aluminum 37nOhms\n");
         printf ("       Resistivity of copper 16.8nOhms\n");
@@ -261,6 +263,7 @@ int magloop_parse_circle(int argc, char *argv[]) {
     if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
+                0,
                 Resistivity,
                 RelativePermeabilityConductor,
                 TxPower,
@@ -401,6 +404,21 @@ int magloop_parse_circle(int argc, char *argv[]) {
                 printf ("PickupLoopArea = %s\n", value);
                 free (value);
             }
+
+            if (result[i].CircCheck == 1) {
+                printf ("Circumference check good\n");
+            }
+            else {
+                printf ("Circumference too large\n");
+            }
+
+            if (result[i].RadiusCheck == 1) {
+                printf ("Radius check good\n");
+            }
+            else {
+                printf ("Radius too large\n");
+            }
+
             printf("\n");
         }
 
@@ -419,6 +437,7 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
 
     double LoopCircumference;
     double LoopConductorDiameter;
+    double LoopConductorSpacing;
     double Resistivity;
     double RelativePermeabilityConductor;
     double TxPower;
@@ -433,7 +452,7 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
 
     magloop_out_t *result = NULL;
 
-    if (argc < 9) {
+    if (argc < 10) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
@@ -448,38 +467,43 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
         
-    if (!resister_sscanf (argv[2], &Resistivity)) {
+    if (!distance_sscanf (argv[2], &LoopConductorSpacing)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
         
-    if (!inductor_sscanf (argv[3], &RelativePermeabilityConductor)) {
+    if (!resister_sscanf (argv[3], &Resistivity)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
         
-    if (!power_sscanf (argv[4], &TxPower)) {
+    if (!inductor_sscanf (argv[4], &RelativePermeabilityConductor)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[5], &FrequencyLowLimit)) {
+    if (!power_sscanf (argv[5], &TxPower)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[6], &FrequencyHighLimit)) {
+    if (!frequency_sscanf (argv[6], &FrequencyLowLimit)) {
+        magloop_calchelp ("multicircle");
+        exit (EXIT_FAILURE);
+    }
+        
+    if (!frequency_sscanf (argv[7], &FrequencyHighLimit)) {
         magloop_calchelp ("multicircle");
 
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[7], &FrequencyStep)) {
+    if (!frequency_sscanf (argv[8], &FrequencyStep)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
     
-    if (1 != sscanf (argv[8], "%i", &nLoops)) {
+    if (1 != sscanf (argv[9], "%i", &nLoops)) {
         magloop_calchelp ("multicircle");
         exit (EXIT_FAILURE);
     }
@@ -487,6 +511,7 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
     if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
+                LoopConductorSpacing,
                 Resistivity,
                 RelativePermeabilityConductor,
                 TxPower,
@@ -627,6 +652,21 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
                 printf ("PickupLoopArea = %s\n", value);
                 free (value);
             }
+
+            if (result[i].CircCheck == 1) {
+                printf ("Circumference check good\n");
+            }
+            else {
+                printf ("Circumference too large\n");
+            }
+
+            if (result[i].RadiusCheck == 1) {
+                printf ("Radius check good\n");
+            }
+            else {
+                printf ("Radius too large\n");
+            }
+
             printf("\n");
         }
 
@@ -708,6 +748,7 @@ int magloop_parse_square(int argc, char *argv[]) {
     if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
+                0,
                 Resistivity,
                 RelativePermeabilityConductor,
                 TxPower,
@@ -866,6 +907,7 @@ int magloop_parse_multisquare(int argc, char *argv[]) {
 
     double LoopCircumference;
     double LoopConductorDiameter;
+    double LoopConductorSpacing;
     double Resistivity;
     double RelativePermeabilityConductor;
     double TxPower;
@@ -895,33 +937,38 @@ int magloop_parse_multisquare(int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
         
-    if (!resister_sscanf (argv[2], &Resistivity)) {
+    if (!distance_sscanf (argv[2], &LoopConductorSpacing)) {
+        magloop_calchelp ("multicircle");
+        exit (EXIT_FAILURE);
+    }
+        
+    if (!resister_sscanf (argv[3], &Resistivity)) {
         magloop_calchelp ("multisquare");
         exit (EXIT_FAILURE);
     }
         
-    if (!inductor_sscanf (argv[3], &RelativePermeabilityConductor)) {
+    if (!inductor_sscanf (argv[4], &RelativePermeabilityConductor)) {
         magloop_calchelp ("multisquare");
         exit (EXIT_FAILURE);
     }
         
-    if (!power_sscanf (argv[4], &TxPower)) {
+    if (!power_sscanf (argv[5], &TxPower)) {
         magloop_calchelp ("multisquare");
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[5], &FrequencyLowLimit)) {
+    if (!frequency_sscanf (argv[6], &FrequencyLowLimit)) {
         magloop_calchelp ("multisquare");
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[6], &FrequencyHighLimit)) {
+    if (!frequency_sscanf (argv[7], &FrequencyHighLimit)) {
         magloop_calchelp ("multisquare");
 
         exit (EXIT_FAILURE);
     }
         
-    if (!frequency_sscanf (argv[7], &FrequencyStep)) {
+    if (!frequency_sscanf (argv[8], &FrequencyStep)) {
         magloop_calchelp ("multisquare");
         exit (EXIT_FAILURE);
     }
@@ -934,6 +981,7 @@ int magloop_parse_multisquare(int argc, char *argv[]) {
     if (!(result = magloop_calc (
                 LoopCircumference, 
                 LoopConductorDiameter,
+                LoopConductorSpacing,
                 Resistivity,
                 RelativePermeabilityConductor,
                 TxPower,

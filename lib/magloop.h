@@ -27,6 +27,9 @@ typedef struct magloop_out_struct {
     double VMAX;
     double LoopDiamater;
     double PickupLoopArea;
+    int RadiusCheck;
+    int CircCheck;
+
 } magloop_out_t;
 
 /*******************************************************************************
@@ -36,6 +39,7 @@ single loop calc
 magloop_out_t *magloop_calc (
     double LoopCircumference,
     double LoopConductorDiameter,
+    double LoopConductorSpacing,
     double Resistivity,
     double RelativePermeabilityConductor,
     /*double K,*/
@@ -83,6 +87,8 @@ double CalcRadiationResistance(
 double CalcProximity(
     double RfResistanceSkinEffect,
     double LoopCircumference,
+    double LoopConductorDiameter,
+    double LoopConductorSpacing,
     double nLoops);
 
 /*******************************************************************************
