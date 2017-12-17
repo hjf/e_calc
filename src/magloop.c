@@ -39,16 +39,12 @@
 #include "lib/voltage.h"
 #include "lib/magloop.h"
 
-int magloop_parse_circle(int argc, char *argv[]);
-int magloop_parse_multicircle(int argc, char *argv[]);
-int magloop_parse_square(int argc, char *argv[]);
-int magloop_parse_multisquare(int argc, char *argv[]);
+//#define DEBUG
+
+int magloop_parse_calc(int argc, char *argv[]);
 
 char * magloop_calcs[] = {
-    "circle",
-    "multicircle",
-    "square",
-    "multisquare",
+    "calc",
     ""
 };
 
@@ -65,80 +61,50 @@ void magloop_printcalcs (void) {
 
 void magloop_calchelp (char *calc) {
 
-    if (0 == strcasecmp (calc, "circle")) {
-        printf ("e_calc magloop circle \n");
-        printf ("   <LOOP CIRCUMFERENCE> \n");
-        printf ("   <CONDUCTOR DIAMETER> \n");
-        printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
+    if (0 == strcasecmp (calc, "calc")) {
+        printf ("e_calc magloop byfreq \n");
+        printf ("   <single or parallel\n");
+        printf ("   <circle or square>\n");
+        printf ("   < <Loop Circumference> |\n");
+        printf ("        <incr>\n");
+        printf ("        <Loop Circumference Start>\n");
+        printf ("        <Loop Circumference End>\n");
+        printf ("        <Loop Circumference Incr> >\n");
+        printf ("   < <Conductor Diameter> |\n");
+        printf ("        <incr>\n");
+        printf ("        <Conductor Diameter Start>\n");
+        printf ("        <Conductor Diameter End>\n");
+        printf ("        <Conductor Diameter Incr> >\n");
+        printf ("   [ if parallel <Conductor Spacing> |\n");
+        printf ("        <incr>\n");
+        printf ("        <Conductor Spacing Start>\n");
+        printf ("        <Conductor Spacing End>\n");
+        printf ("        <Conductor Spacing Incr> ]\n");
+        printf ("   <Resistivity Of Loop Material> \n");
         printf ("       Resistivity of aluminum 37nOhms\n");
         printf ("       Resistivity of copper 16.8nOhms\n");
-        printf ("   <RELATIVE PERMEABILITY OF LOOP MATERIAL> \n");
+        printf ("   <Relative Permeability Of Loop MateriaL> \n");
         printf ("       Relative permeability of aluminum 1.000022\n");
         printf ("       Relative permeability of copper 0.999994\n");
-        printf ("   <TRANSMITTER POWER> \n");
-        printf ("   <LOW FREQUENCY LIMIT>\n");
-        printf ("   <HIGH FREQUENCY LIMIT>\n");
-        printf ("   <FREQUENCY STEP>\n");
+        printf ("   <Transmitter Power> \n");
+        printf ("   < <Frequency> |\n");
+        printf ("        <incr>\n");
+        printf ("        <Frequency Start>\n");
+        printf ("        <Frequency End>\n");
+        printf ("        <Frequency Incr> >\n");
+        printf ("   [ if parallel <Number Of Loop Conductors> |\n");
+        printf ("        <incr>\n");
+        printf ("        <Number Of Loop Conductors Start>\n");
+        printf ("        <Number Of Loop Conductors End>\n");
+        printf ("        <Number Of Loop Conductors Incr> ]\n");
+        printf ("\n");
+        printf ("NOTE you can only itterate over one argument\n");
+
     }
 
-    else if (0 == strcasecmp (calc, "multicircle")) {
-        printf ("e_calc magloop multicircle \n");
-        printf ("   <LOOP CIRCUMFERENCE> \n");
-        printf ("   <CONDUCTOR DIAMETER> \n");
-        printf ("   <CONDUCTOR SPACING> \n");
-        printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
-        printf ("       Resistivity of aluminum 37nOhms\n");
-        printf ("       Resistivity of copper 16.8nOhms\n");
-        printf ("   <RELATIVE PERMEABILITY OF LOOP MATERIAL> \n");
-        printf ("       Relative permeability of aluminum 1.000022\n");
-        printf ("       Relative permeability of copper 0.999994\n");
-        //printf ("   <LOOP COEFFICIENT OF COUPLING>\n");
-        //printf ("       0.6 for a start point\n");
-        printf ("   <TRANSMITTER POWER> \n");
-        printf ("   <LOW FREQUENCY LIMIT> \n");
-        printf ("   <HIGH FREQUENCY LIMIT> \n");
-        printf ("   <FREQUENCY STEP> \n");
-        printf ("   NUMBER OF LOOP CONDUCTORS>\n");
+    else {
+        magloop_printcalcs ();
     }
-
-    else if (0 == strcasecmp (calc, "square")) {
-        printf ("e_calc magloop square \n");
-        printf ("   <LOOP CIRCUMFERENCE> \n");
-        printf ("   <CONDUCTOR DIAMETER> \n");
-        printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
-        printf ("       Resistivity of aluminum 37nOhms\n");
-        printf ("       Resistivity of copper 16.8nOhms\n");
-        printf ("   <RELATIVE PERMEABILITY OF LOOP MATERIAL> \n");
-        printf ("       Relative permeability of aluminum 1.000022\n");
-        printf ("       Relative permeability of copper 0.999994\n");
-        printf ("   <TRANSMITTER POWER> \n");
-        printf ("   <LOW FREQUENCY LIMIT>\n");
-        printf ("   <HIGH FREQUENCY LIMIT>\n");
-        printf ("   <FREQUENCY STEP>\n");
-    }
-
-    else if (0 == strcasecmp (calc, "multisquare")) {
-        printf ("e_calc magloop multisquare \n");
-        printf ("   <LOOP CIRCUMFERENCE> \n");
-        printf ("   <CONDUCTOR DIAMETER> \n");
-        printf ("   <CONDUCTOR SPACING> \n");
-        printf ("   <RESISTIVITY OF LOOP MATERIAL> \n");
-        printf ("       Resistivity of aluminum 37nOhms\n");
-        printf ("       Resistivity of copper 16.8nOhms\n");
-        printf ("   <RELATIVE PERMEABILITY OF LOOP MATERIAL> \n");
-        printf ("       Relative permeability of aluminum 1.000022\n");
-        printf ("       Relative permeability of copper 0.999994\n");
-        //printf ("   <LOOP COEFFICIENT OF COUPLING>\n");
-        //printf ("       0.6 for a start point\n");
-        printf ("   <TRANSMITTER POWER> \n");
-        printf ("   <LOW FREQUENCY LIMIT> \n");
-        printf ("   <HIGH FREQUENCY LIMIT> \n");
-        printf ("   <FREQUENCY STEP> \n");
-        printf ("   NUMBER OF LOOP CONDUCTORS>\n");
-    }
-
-
-
 }
 
 
@@ -149,40 +115,17 @@ int magloop_parse (int argc, char *argv[]) {
         exit (EXIT_FAILURE);
     }
     
-    /***** circle *****/
+    /***** single *****/
 
-    if (0 == strcasecmp (argv[2], "circle")) {
-        if (argc < 11) { // 8 args plus 3 to get here
-            magloop_calchelp ("circle");
+    if (0 == strcasecmp (argv[2], "calc")) {
+         // ((8 OR 11) or (10 OR 13)) plus 3 to get here
+        if (argc != 11 && argc != 14 && argc != 13 && argc != 16) {
+            magloop_calchelp ("calc");
             
             exit (EXIT_FAILURE);
         }
 
-        return magloop_parse_circle(argc - 3, argv + 3);
-    }
-
-    /***** multicircle *****/
-
-    if (0 == strcasecmp (argv[2], "multicircle")) {
-        if (argc < 12) { // 9 args plus 3 to get here
-            magloop_calchelp ("multicircle");
-            
-            exit (EXIT_FAILURE);
-        }
-
-        return magloop_parse_multicircle(argc - 3, argv + 3);
-    }
-
-    /***** square *****/
-
-    else if (0 == strcasecmp (argv[2], "square")) {
-        if (argc < 11) { // 8 args plus 3 to get here
-            magloop_calchelp ("square");
-            
-            exit (EXIT_FAILURE);
-        }
-
-        return magloop_parse_square(argc - 3, argv + 3);
+        return magloop_parse_calc(argc - 3, argv + 3);
     }
 
     else {
@@ -194,337 +137,449 @@ int magloop_parse (int argc, char *argv[]) {
 }
 
 /*******************************************************************************
-circle
+magloop print results
 *******************************************************************************/
 
-int magloop_parse_circle(int argc, char *argv[]) {
 
-    double LoopCircumference;
-    double LoopConductorDiameter;
-    double Resistivity;
-    double RelativePermeabilityConductor;
-    double TxPower;
-    double FrequencyLowLimit;
-    double FrequencyHighLimit;
-    double FrequencyStep;
-    size_t nOuts;
+int magloop_print(magloop_out_t sResult) {
 
-    size_t i;
     char *value;
 
-    magloop_out_t *result = NULL;
-
-    if (argc < 8) {
-        magloop_calchelp (argv[2]);
+    if (!(value = resister_sprintf (4, sResult.RadiationResistance))) {
         exit (EXIT_FAILURE);
     }
-
-    if (!distance_sscanf (argv[0], &LoopCircumference)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[1], &LoopConductorDiameter)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!resister_sscanf (argv[2], &Resistivity)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!inductor_sscanf (argv[3], &RelativePermeabilityConductor)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!power_sscanf (argv[4], &TxPower)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[5], &FrequencyLowLimit)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[6], &FrequencyHighLimit)) {
-        magloop_calchelp ("circle");
-
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[7], &FrequencyStep)) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    }
-    
-    if (!(result = magloop_calc (
-                LoopCircumference, 
-                LoopConductorDiameter,
-                0,
-                Resistivity,
-                RelativePermeabilityConductor,
-                TxPower,
-                FrequencyLowLimit,
-                FrequencyHighLimit,
-                FrequencyStep,
-                0,
-                1,
-                &nOuts))
-    ) {
-        magloop_calchelp ("circle");
-        exit (EXIT_FAILURE);
-    } 
-    
     else {
+        printf ("RadiationResistance = %s\n", value);
+        free (value);
+    }
 
-        for (i = 0; i < nOuts ; i++) {
+    if (!(value = distance_sprintf (4, sResult.SkinDepth))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("SkinDepth = %s\n", value);
+        free (value);
+    }
 
-            printf("\n");
+    if (!(value = resister_sprintf (4, sResult.RfResistanceLoss2))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("RfResistanceLoss2 = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = frequency_sprintf (4, result[i].Frequency))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Frequency = %s\n", value);
-                free (value);
-            }
-            printf("_______________________________________\n");
-
-            if (!(value = resister_sprintf (4, result[i].RadiationResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RadiationResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SkinDepth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RfResistanceLoss2 = %s\n", value);
-                free (value);
-            }
-
-            printf ("Efficiency = %lf\n", result[i].Efficiency);
+    printf ("Efficiency = %lf\n", sResult.Efficiency);
 
 
-            if (!(value = inductor_sprintf (4, result[i].LoopInductance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopInductance = %s\n", value);
-                free (value);
-            }
+    if (!(value = inductor_sprintf (4, sResult.LoopInductance))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("LoopInductance = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = capacitor_sprintf (4, result[i].C))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("C = %s\n", value);
-                free (value);
-            }
+    if (!(value = capacitor_sprintf (4, sResult.C))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("C = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = resister_sprintf (4, result[i].Xl))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Xl = %s\n", value);
-                free (value);
-            }
+    if (!(value = resister_sprintf (4, sResult.Xl))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("Xl = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = resister_sprintf (4, result[i].LoopSeriesImpedance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopSeriesImpedance = %s\n", value);
-                free (value);
-            }
+    if (!(value = resister_sprintf (4, sResult.LoopSeriesImpedance))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("LoopSeriesImpedance = %s\n", value);
+        free (value);
+    }
 
-            printf ("Q = %lf\n", result[i].Q);
-            
+    printf ("Q = %lf\n", sResult.Q);
+    
 
-            if (!(value = frequency_sprintf (4, result[i].SixDbBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SixDbBandwidth = %s\n", value);
-                free (value);
-            }
+    if (!(value = frequency_sprintf (4, sResult.SixDbBandwidth))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("SixDbBandwidth = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = frequency_sprintf (4, result[i].SwrBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SwrBandwidth = %s\n", value);
-                free (value);
-            }
+    if (!(value = frequency_sprintf (4, sResult.SwrBandwidth))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("SwrBandwidth = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = resister_sprintf (4, result[i].LcDynamicResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LcDynamicResistance = %s\n", value);
-                free (value);
-            }
+    if (!(value = resister_sprintf (4, sResult.LcDynamicResistance))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("LcDynamicResistance = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = voltage_sprintf (4, result[i].VMAX))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("VMAX = %s\n", value);
-                free (value);
-            }
+    if (!(value = voltage_sprintf (4, sResult.VMAX))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("VMAX = %s\n", value);
+        free (value);
+    }
 
 
 
-            if (!(value = distance_sprintf (4, result[i].LoopDiamater))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopDiamater = %s\n", value);
-                free (value);
-            }
+    if (!(value = distance_sprintf (4, sResult.LoopDiamater))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("LoopDiamater = %s\n", value);
+        free (value);
+    }
 
-            if (!(value = distance_sprintf (4, result[i].PickupLoopArea))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("PickupLoopArea = %s\n", value);
-                free (value);
-            }
+    if (!(value = distance_sprintf (4, sResult.PickupLoopArea))) {
+        exit (EXIT_FAILURE);
+    }
+    else {
+        printf ("PickupLoopArea = %s\n", value);
+        free (value);
+    }
 
-            if (result[i].CircCheck == 1) {
-                printf ("Circumference check good\n");
-            }
-            else {
-                printf ("Circumference too large\n");
-            }
+    if (sResult.CircCheck == 1) {
+        printf ("Circumference check good\n");
+    }
+    else {
+        printf ("Circumference too large\n");
+    }
 
-            if (result[i].RadiusCheck == 1) {
-                printf ("Radius check good\n");
-            }
-            else {
-                printf ("Radius too large\n");
-            }
-
-            printf("\n");
-        }
-
-        free(result);
-
+    if (sResult.RadiusCheck == 1) {
+        printf ("Radius check good\n");
+    }
+    else {
+        printf ("Radius too large\n");
     }
 
     return 1;
 }
 
 /*******************************************************************************
-multicircle
+ calc
 *******************************************************************************/
 
-int magloop_parse_multicircle(int argc, char *argv[]) {
+int magloop_parse_calc(int argc, char *argv[]) {
 
-    double LoopCircumference;
-    double LoopConductorDiameter;
-    double LoopConductorSpacing;
-    double Resistivity;
-    double RelativePermeabilityConductor;
-    double TxPower;
-    double FrequencyLowLimit;
-    double FrequencyHighLimit;
-    double FrequencyStep;
-    int nLoops;
+    magloop_in_t sIn;
     size_t nOuts;
 
     size_t i;
     char *value;
 
-    magloop_out_t *result = NULL;
+    magloop_out_t *sResult = NULL;
 
-    if (argc < 10) {
-        magloop_calchelp ("multicircle");
+    size_t nArg = 0;
+
+    int count;
+    int isIncr = 0;
+
+#ifdef DEBUG
+    printf("parsing single/parallel\n");
+#endif
+
+    int isParallel = -1;
+    sscanf (argv[nArg], "%*1[sS]%*1[iI]%*1[nN]%*1[gG]%*1[lL]%*1[eE]%n", &count);
+    if (count == 6) {
+        isParallel = 0;
+        if (argc != 8 && argc != 11 ) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+    }
+
+    count = 0;
+    sscanf (argv[nArg], "%*1[pP]%*1[aA]%*1[rR]%*1[aA]%*1[lL]%*1[lL]%*1[eE]%*1[lL]%n", &count);
+    if (count == 8) {
+        isParallel = 1;
+        if (argc != 10 && argc != 13) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+    }
+    
+    if (isParallel < 0) {
+        magloop_calchelp ("calc");
         exit (EXIT_FAILURE);
     }
 
-    if (!distance_sscanf (argv[0], &LoopCircumference)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[1], &LoopConductorDiameter)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[2], &LoopConductorSpacing)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!resister_sscanf (argv[3], &Resistivity)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!inductor_sscanf (argv[4], &RelativePermeabilityConductor)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!power_sscanf (argv[5], &TxPower)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[6], &FrequencyLowLimit)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[7], &FrequencyHighLimit)) {
-        magloop_calchelp ("multicircle");
+    nArg++;
+    
+#ifdef DEBUG
+    printf("parsing circle/square\n");
+#endif
 
+    count = 0;
+    sIn.isSquare = -1;
+    sscanf (argv[nArg], "%*1[cC]%*1[iI]%*1[rR]%*1[cC]%*1[lL]%*1[eE]%n", &count);
+    if (count == 6) {
+        sIn.isSquare = 0;
+    }  
+
+    count = 0;
+    sscanf (argv[nArg], "%*1[sS]%*1[qQ]%*1[uU]%*1[aA]%*1[rR]%*1[eE]%n", &count);
+    if (count == 6) {
+        sIn.isSquare = 1;
+    }
+
+    if (sIn.isSquare < 0) {
+        magloop_calchelp ("calc");
         exit (EXIT_FAILURE);
     }
-        
-    if (!frequency_sscanf (argv[8], &FrequencyStep)) {
-        magloop_calchelp ("multicircle");
+
+    nArg++;
+
+    /***** LoopCircumference *****/
+
+#ifdef DEBUG
+    printf("parsing LoopCircumference\n");
+#endif
+
+    count = 0;
+    sscanf (argv[nArg], "%*1[iI]%*1[nN]%*1[cC]%*1[rR]%n", &count);
+    if (count == 4) {
+        sIn.LoopCircumference = -1;
+        isIncr = 1;
+        nArg++;
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopCircumferenceStart)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopCircumferenceEnd)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopCircumferenceIncr)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+    }
+
+    else if (!distance_sscanf (argv[nArg++], &sIn.LoopCircumference)) {
+        magloop_calchelp ("calc");
         exit (EXIT_FAILURE);
     }
     
-    if (1 != sscanf (argv[9], "%i", &nLoops)) {
-        magloop_calchelp ("multicircle");
+    /***** LoopConductorDiameter *****/
+
+#ifdef DEBUG
+    printf("parsing LoopConductorDiameter\n");
+#endif
+
+    count = 0;
+    sscanf (argv[nArg], "%*1[iI]%*1[nN]%*1[cC]%*1[rR]%n", &count);
+    if (count == 4) {
+        if (isIncr) {
+            printf("Already incr over a argument\n"); 
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+        sIn.LoopConductorDiameter = -1;
+        isIncr = 1;
+        nArg++;
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorDiameterStart)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorDiameterEnd)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorDiameterIncr)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+    }
+
+    else if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorDiameter)) {
+        magloop_calchelp ("calc");
+        exit (EXIT_FAILURE);
+    }
+        
+    /***** LoopConductorSpacing *****/
+
+    if (isParallel) {
+#ifdef DEBUG
+    printf("parsing LoopConductorSpacing\n");
+#endif
+
+        count = 0;
+        sscanf (argv[nArg], "%*1[iI]%*1[nN]%*1[cC]%*1[rR]%n", &count);
+        if (count == 4) {
+            if (isIncr) {
+                printf("Already incr over a argument\n"); 
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+            sIn.LoopConductorSpacing = -1;
+            isIncr = 1;
+            nArg++;
+            if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorSpacingStart)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+            if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorSpacingEnd)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+            if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorSpacingIncr)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+        }
+
+        else if (!distance_sscanf (argv[nArg++], &sIn.LoopConductorSpacing)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+    }        
+
+#ifdef DEBUG
+    printf("parsing Resistivity\n");
+#endif
+
+    if (!resister_sscanf (argv[nArg++], &sIn.Resistivity)) {
+        magloop_calchelp ("calc");
+        exit (EXIT_FAILURE);
+    }
+        
+#ifdef DEBUG
+    printf("parsing RelativePermeabilityConductor\n");
+#endif
+
+    if (!inductor_sscanf (argv[nArg++], &sIn.RelativePermeabilityConductor)) {
+        magloop_calchelp ("calc");
+        exit (EXIT_FAILURE);
+    }
+        
+#ifdef DEBUG
+    printf("parsing TxPower\n");
+#endif
+
+    if (!power_sscanf (argv[nArg++], &sIn.TxPower)) {
+        magloop_calchelp ("calc");
         exit (EXIT_FAILURE);
     }
 
-    if (!(result = magloop_calc (
-                LoopCircumference, 
-                LoopConductorDiameter,
-                LoopConductorSpacing,
-                Resistivity,
-                RelativePermeabilityConductor,
-                TxPower,
-                FrequencyLowLimit,
-                FrequencyHighLimit,
-                FrequencyStep,
-                0,
-                nLoops,
+    /***** Frequency *****/
+
+#ifdef DEBUG
+    printf("parsing Frequency\n");
+#endif
+
+    count = 0;
+    sscanf (argv[nArg], "%*1[iI]%*1[nN]%*1[cC]%*1[rR]%n", &count);
+    if (count == 4) {
+        if (isIncr) {
+            printf("Already incr over a argument\n"); 
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+        sIn.Frequency = -1;
+        isIncr = 1;
+        nArg++;
+        if (!frequency_sscanf (argv[nArg++], &sIn.FrequencyStart)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!frequency_sscanf (argv[nArg++], &sIn.FrequencyEnd)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+        if (!frequency_sscanf (argv[nArg++], &sIn.FrequencyIncr)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+
+    }
+
+    else if (!frequency_sscanf (argv[nArg++], &sIn.Frequency)) {
+        magloop_calchelp ("calc");
+        exit (EXIT_FAILURE);
+    }
+       
+
+    /***** nLoops *****/
+
+    if (isParallel) {
+#ifdef DEBUG
+    printf("parsing nLoops\n");
+#endif
+
+        count = 0;
+        sscanf (argv[nArg], "%*1[iI]%*1[nN]%*1[cC]%*1[rR]%n", &count);
+        if (count == 4) {
+            if (isIncr) {
+                printf("Already incr over a argument\n"); 
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+            sIn.nLoops = -1;
+            isIncr = 1;
+            nArg++;
+            if (1 != sscanf (argv[nArg++], "%i", &sIn.nLoopsStart)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+            if (1 != sscanf (argv[nArg++], "%i", &sIn.nLoopsEnd)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+            if (1 != sscanf (argv[nArg++], "%i", &sIn.nLoopsIncr)) {
+                magloop_calchelp ("calc");
+                exit (EXIT_FAILURE);
+            }
+
+        }
+
+        else if (1 != sscanf (argv[nArg++], "%i", &sIn.nLoops)) {
+            magloop_calchelp ("calc");
+            exit (EXIT_FAILURE);
+        }
+    }
+    else {
+        sIn.nLoops = 1;
+    }
+    
+    if (!(sResult = magloop_calc(
+                &sIn,
                 &nOuts))
     ) {
-        magloop_calchelp ("multicircle");
+        magloop_calchelp ("calc");
         exit (EXIT_FAILURE);
-    } 
+    }
     
     else {
 
@@ -532,602 +587,56 @@ int magloop_parse_multicircle(int argc, char *argv[]) {
 
             printf("\n");
 
-            if (!(value = frequency_sprintf (4, result[i].Frequency))) {
+            if (!(value = distance_sprintf (4, sResult[i].LoopCircumference))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("Loop Circumference = %s\n", value);
+                free (value);
+            }
+            if (!(value = distance_sprintf (4, sResult[i].LoopConductorDiameter))) {
+                exit (EXIT_FAILURE);
+            }
+            else {
+                printf ("Loop Conductor Diameter = %s\n", value);
+                free (value);
+            }
+
+            if (isParallel) {
+                if (!(value = distance_sprintf (4, sResult[i].LoopConductorSpacing))) {
+                    exit (EXIT_FAILURE);
+                }
+                else {
+                    printf ("Loop Conductor Spacing = %s\n", value);
+                    free (value);
+                }
+            }
+
+            if (isParallel) {
+                printf ("Number of Loops = %i\n", sResult[i].nLoops);
+            }
+
+            if (!(value = frequency_sprintf (4, sResult[i].Frequency))) {
                 exit (EXIT_FAILURE);
             }
             else {
                 printf ("Frequency = %s\n", value);
                 free (value);
             }
+
             printf("_______________________________________\n");
+            printf("\n");
 
-            if (!(value = resister_sprintf (4, result[i].RadiationResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RadiationResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SkinDepth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RfResistanceLoss2 = %s\n", value);
-                free (value);
-            }
-
-            printf ("Efficiency = %lf\n", result[i].Efficiency);
-
-
-            if (!(value = inductor_sprintf (4, result[i].LoopInductance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopInductance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = capacitor_sprintf (4, result[i].C))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("C = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].Xl))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Xl = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LoopSeriesImpedance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopSeriesImpedance = %s\n", value);
-                free (value);
-            }
-
-            printf ("Q = %lf\n", result[i].Q);
-            
-
-            if (!(value = frequency_sprintf (4, result[i].SixDbBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SixDbBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = frequency_sprintf (4, result[i].SwrBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SwrBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LcDynamicResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LcDynamicResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = voltage_sprintf (4, result[i].VMAX))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("VMAX = %s\n", value);
-                free (value);
-            }
-
-
-
-            if (!(value = distance_sprintf (4, result[i].LoopDiamater))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopDiamater = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].PickupLoopArea))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("PickupLoopArea = %s\n", value);
-                free (value);
-            }
-
-            if (result[i].CircCheck == 1) {
-                printf ("Circumference check good\n");
-            }
-            else {
-                printf ("Circumference too large\n");
-            }
-
-            if (result[i].RadiusCheck == 1) {
-                printf ("Radius check good\n");
-            }
-            else {
-                printf ("Radius too large\n");
-            }
+            magloop_print(sResult[i]);
 
             printf("\n");
         }
 
-        free(result);
+        free(sResult);
 
     }
 
     return 1;
 }
 
-/*******************************************************************************
-square
-*******************************************************************************/
 
-int magloop_parse_square(int argc, char *argv[]) {
-
-    double LoopCircumference;
-    double LoopConductorDiameter;
-    double Resistivity;
-    double RelativePermeabilityConductor;
-    double TxPower;
-    double FrequencyLowLimit;
-    double FrequencyHighLimit;
-    double FrequencyStep;
-    size_t nOuts;
-
-    size_t i;
-    char *value;
-
-    magloop_out_t *result = NULL;
-
-    if (argc < 8) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-
-    if (!distance_sscanf (argv[0], &LoopCircumference)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[1], &LoopConductorDiameter)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!resister_sscanf (argv[2], &Resistivity)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!inductor_sscanf (argv[3], &RelativePermeabilityConductor)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!power_sscanf (argv[4], &TxPower)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[5], &FrequencyLowLimit)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[6], &FrequencyHighLimit)) {
-        magloop_calchelp ("square");
-
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[7], &FrequencyStep)) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    }
-    
-
-    if (!(result = magloop_calc (
-                LoopCircumference, 
-                LoopConductorDiameter,
-                0,
-                Resistivity,
-                RelativePermeabilityConductor,
-                TxPower,
-                FrequencyLowLimit,
-                FrequencyHighLimit,
-                FrequencyStep,
-                1,
-                1,
-                &nOuts))
-    ) {
-        magloop_calchelp ("square");
-        exit (EXIT_FAILURE);
-    } 
-    
-    else {
-
-        for (i = 0; i < nOuts ; i++) {
-
-            printf("\n");
-
-            if (!(value = frequency_sprintf (4, result[i].Frequency))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Frequency = %s\n", value);
-                free (value);
-            }
-            printf("_______________________________________\n");
-
-            if (!(value = resister_sprintf (4, result[i].RadiationResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RadiationResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SkinDepth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RfResistanceLoss2 = %s\n", value);
-                free (value);
-            }
-
-            printf ("Efficiency = %lf\n", result[i].Efficiency);
-
-
-            if (!(value = inductor_sprintf (4, result[i].LoopInductance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopInductance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = capacitor_sprintf (4, result[i].C))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("C = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].Xl))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Xl = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LoopSeriesImpedance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopSeriesImpedance = %s\n", value);
-                free (value);
-            }
-
-            printf ("Q = %lf\n", result[i].Q);
-            
-
-            if (!(value = frequency_sprintf (4, result[i].SixDbBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SixDbBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = frequency_sprintf (4, result[i].SwrBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SwrBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LcDynamicResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LcDynamicResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = voltage_sprintf (4, result[i].VMAX))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("VMAX = %s\n", value);
-                free (value);
-            }
-
-
-
-            if (!(value = distance_sprintf (4, result[i].LoopDiamater))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopDiamater = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].PickupLoopArea))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("PickupLoopArea = %s\n", value);
-                free (value);
-            }
-            printf("\n");
-        }
-
-        free(result);
-
-    }
-
-    return 1;
-}
-
-/*******************************************************************************
-multisquare
-*******************************************************************************/
-
-int magloop_parse_multisquare(int argc, char *argv[]) {
-
-    double LoopCircumference;
-    double LoopConductorDiameter;
-    double LoopConductorSpacing;
-    double Resistivity;
-    double RelativePermeabilityConductor;
-    double TxPower;
-    double FrequencyLowLimit;
-    double FrequencyHighLimit;
-    double FrequencyStep;
-    int nLoops;
-    size_t nOuts;
-
-    size_t i;
-    char *value;
-
-    magloop_out_t *result = NULL;
-
-    if (argc < 9) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-
-    if (!distance_sscanf (argv[0], &LoopCircumference)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[1], &LoopConductorDiameter)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!distance_sscanf (argv[2], &LoopConductorSpacing)) {
-        magloop_calchelp ("multicircle");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!resister_sscanf (argv[3], &Resistivity)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!inductor_sscanf (argv[4], &RelativePermeabilityConductor)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!power_sscanf (argv[5], &TxPower)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[6], &FrequencyLowLimit)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[7], &FrequencyHighLimit)) {
-        magloop_calchelp ("multisquare");
-
-        exit (EXIT_FAILURE);
-    }
-        
-    if (!frequency_sscanf (argv[8], &FrequencyStep)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-    
-    if (1 != sscanf (argv[8], "%i", &nLoops)) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    }
-
-    if (!(result = magloop_calc (
-                LoopCircumference, 
-                LoopConductorDiameter,
-                LoopConductorSpacing,
-                Resistivity,
-                RelativePermeabilityConductor,
-                TxPower,
-                FrequencyLowLimit,
-                FrequencyHighLimit,
-                FrequencyStep,
-                1,
-                nLoops,
-                &nOuts))
-    ) {
-        magloop_calchelp ("multisquare");
-        exit (EXIT_FAILURE);
-    } 
-    
-    else {
-
-        for (i = 0; i < nOuts ; i++) {
-
-            printf("\n");
-
-            if (!(value = frequency_sprintf (4, result[i].Frequency))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Frequency = %s\n", value);
-                free (value);
-            }
-            printf("_______________________________________\n");
-
-            if (!(value = resister_sprintf (4, result[i].RadiationResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RadiationResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].SkinDepth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SkinDepth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].RfResistanceLoss2))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("RfResistanceLoss2 = %s\n", value);
-                free (value);
-            }
-
-            printf ("Efficiency = %lf\n", result[i].Efficiency);
-
-
-            if (!(value = inductor_sprintf (4, result[i].LoopInductance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopInductance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = capacitor_sprintf (4, result[i].C))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("C = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].Xl))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("Xl = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LoopSeriesImpedance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopSeriesImpedance = %s\n", value);
-                free (value);
-            }
-
-            printf ("Q = %lf\n", result[i].Q);
-            
-
-            if (!(value = frequency_sprintf (4, result[i].SixDbBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SixDbBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = frequency_sprintf (4, result[i].SwrBandwidth))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("SwrBandwidth = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = resister_sprintf (4, result[i].LcDynamicResistance))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LcDynamicResistance = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = voltage_sprintf (4, result[i].VMAX))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("VMAX = %s\n", value);
-                free (value);
-            }
-
-
-
-            if (!(value = distance_sprintf (4, result[i].LoopDiamater))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("LoopDiamater = %s\n", value);
-                free (value);
-            }
-
-            if (!(value = distance_sprintf (4, result[i].PickupLoopArea))) {
-                exit (EXIT_FAILURE);
-            }
-            else {
-                printf ("PickupLoopArea = %s\n", value);
-                free (value);
-            }
-            printf("\n");
-        }
-
-        free(result);
-
-    }
-
-    return 1;
-}

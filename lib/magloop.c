@@ -51,7 +51,7 @@
 
 
 /*******************************************************************************
- function to calc a single loop
+ function to calc a loop iterating over freq
 
 *******************************************************************************/
 // coefficient of coupling
@@ -63,7 +63,301 @@
 #define NHARMONICS 12
 
 
+#define INCR_EQUAL_IF_GREATER(V, I, E) (((V) + (I) > (E)) ? (E) : (V) + (I))
+
+/*******************************************************************************
+    function to count how big of a result array we need
+*******************************************************************************/
+
+size_t magloop_count_output(
+    double dfStart,
+    double dfEnd,
+    double dfIncr
+);
+
 magloop_out_t *magloop_calc (
+    magloop_in_t *sIn,
+    size_t *nOuts)
+{
+
+    magloop_out_t *sResult = NULL;
+
+
+    double dfValue;
+
+
+    size_t iSize = 0;
+
+    /***** itterate LoopCircumference? *****/
+
+    if (sIn->LoopCircumference < 0) {
+
+        /**** alocate output space *****/
+
+        iSize = magloop_count_output(
+            sIn->LoopCircumferenceStart,
+            sIn->LoopCircumferenceEnd,
+            sIn->LoopCircumferenceIncr);
+    
+        if (NULL == (sResult = malloc( (iSize + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = iSize;
+
+        /***** iterate over the wanted calcs *****/        
+
+        for ( iSize = 0, dfValue = sIn->LoopCircumferenceStart;
+              iSize < *nOuts;
+              iSize++, dfValue = INCR_EQUAL_IF_GREATER(dfValue,
+                                                  sIn->LoopCircumferenceIncr,
+                                                  sIn->LoopCircumferenceEnd)
+        ) {
+             magloop_calc_mainloop(
+                dfValue,
+                sIn->LoopConductorDiameter,
+                sIn->LoopConductorSpacing,
+                sIn->Resistivity,
+                sIn->RelativePermeabilityConductor,
+                /*double K,*/
+                sIn->TxPower,
+                sIn->Frequency,
+                sIn->isSquare,
+                sIn->nLoops,
+                iSize,
+                sResult);
+        }
+    }
+
+    /***** itterate LoopConductorDiameter? *****/
+
+    else if (sIn->LoopConductorDiameter < 0) {
+
+        /**** alocate output space *****/
+
+        iSize = magloop_count_output(
+            sIn->LoopConductorDiameterStart,
+            sIn->LoopConductorDiameterEnd,
+            sIn->LoopConductorDiameterIncr);
+    
+        if (NULL == (sResult = malloc( (iSize + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = iSize;
+
+        /***** iterate over the wanted calcs *****/        
+
+        for ( iSize = 0, dfValue = sIn->LoopConductorDiameterStart;
+              iSize < *nOuts;
+              iSize++, dfValue = INCR_EQUAL_IF_GREATER(dfValue,
+                                                  sIn->LoopConductorDiameterIncr,
+                                                  sIn->LoopConductorDiameterEnd)
+        ) {
+             magloop_calc_mainloop(
+                sIn->LoopCircumference,
+                dfValue,
+                sIn->LoopConductorSpacing,
+                sIn->Resistivity,
+                sIn->RelativePermeabilityConductor,
+                /*double K,*/
+                sIn->TxPower,
+                sIn->Frequency,
+                sIn->isSquare,
+                sIn->nLoops,
+                iSize,
+                sResult);
+        }
+    }
+
+    /***** itterate LoopConductorSpacing? *****/
+
+    else if (sIn->LoopConductorSpacing < 0) {
+
+        /**** alocate output space *****/
+
+        iSize = magloop_count_output(
+            sIn->LoopConductorSpacingStart,
+            sIn->LoopConductorSpacingEnd,
+            sIn->LoopConductorSpacingIncr);
+    
+        if (NULL == (sResult = malloc( (iSize + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = iSize;
+
+        /***** iterate over the wanted calcs *****/        
+
+        for ( iSize = 0, dfValue = sIn->LoopConductorSpacingStart;
+              iSize < *nOuts;
+              iSize++, dfValue = INCR_EQUAL_IF_GREATER(dfValue,
+                                                  sIn->LoopConductorSpacingIncr,
+                                                  sIn->LoopConductorSpacingEnd)
+        ) {
+             magloop_calc_mainloop(
+                sIn->LoopCircumference,
+                sIn->LoopConductorDiameter,            
+                dfValue,
+                sIn->Resistivity,
+                sIn->RelativePermeabilityConductor,
+                /*double K,*/
+                sIn->TxPower,
+                sIn->Frequency,
+                sIn->isSquare,
+                sIn->nLoops,
+                iSize,
+                sResult);
+        }
+    }
+
+    /***** itterate Frequency? *****/
+
+    else if (sIn->Frequency < 0) {
+
+        /**** alocate output space *****/
+
+        iSize = magloop_count_output(
+            sIn->FrequencyStart,
+            sIn->FrequencyEnd,
+            sIn->FrequencyIncr);
+    
+        if (NULL == (sResult = malloc( (iSize + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = iSize;
+
+        /***** iterate over the wanted calcs *****/        
+
+        for ( iSize = 0, dfValue = sIn->FrequencyStart;
+              iSize < *nOuts;
+              iSize++, dfValue = INCR_EQUAL_IF_GREATER(dfValue,
+                                                  sIn->FrequencyIncr,
+                                                  sIn->FrequencyEnd)
+        ) {
+             magloop_calc_mainloop(
+                sIn->LoopCircumference,
+                sIn->LoopConductorDiameter,            
+                sIn->LoopConductorSpacing,
+                sIn->Resistivity,
+                sIn->RelativePermeabilityConductor,
+                /*double K,*/
+                sIn->TxPower,
+                dfValue,
+                sIn->isSquare,
+                sIn->nLoops,
+                iSize,
+                sResult);
+        }
+    }
+
+    /***** itterate nLoops? *****/
+
+    else if (sIn->nLoops < 0) {
+
+        /**** alocate output space *****/
+
+        iSize = magloop_count_output(
+            (double)sIn->nLoopsStart,
+            (double)sIn->nLoopsEnd,
+            (double)sIn->nLoopsIncr);
+    
+        if (NULL == (sResult = malloc( (iSize + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = iSize;
+
+        /***** iterate over the wanted calcs *****/        
+
+        for ( iSize = 0, dfValue = (double)sIn->nLoopsStart;
+              iSize < *nOuts;
+              iSize++, dfValue = INCR_EQUAL_IF_GREATER(dfValue,
+                                                  (double)sIn->nLoopsIncr,
+                                                  (double)sIn->nLoopsEnd)
+        ) {
+             magloop_calc_mainloop(
+                sIn->LoopCircumference,
+                sIn->LoopConductorDiameter,            
+                sIn->LoopConductorSpacing,
+                sIn->Resistivity,
+                sIn->RelativePermeabilityConductor,
+                /*double K,*/
+                sIn->TxPower,
+                sIn->Frequency,
+                sIn->isSquare,
+                (int)dfValue,
+                iSize,
+                sResult);
+        }
+    }
+
+    /***** no iteration *****/
+
+    else {
+
+        if (NULL == (sResult = malloc( (1 + 1) * sizeof(magloop_out_t) ) ) ) {
+            fprintf(stderr, "magloop_calc() malloc() failed\n");
+            return NULL;
+        }
+
+        *nOuts = 1;
+
+
+        magloop_calc_mainloop(
+            sIn->LoopCircumference,
+            sIn->LoopConductorDiameter,            
+            sIn->LoopConductorSpacing,
+            sIn->Resistivity,
+            sIn->RelativePermeabilityConductor,
+            /*double K,*/
+            sIn->TxPower,
+            sIn->Frequency,
+            sIn->isSquare,
+            sIn->nLoops,
+            iSize,
+            sResult);
+    
+    }
+
+    return sResult;
+}
+
+/*******************************************************************************
+    function to count how big of a result array we need
+*******************************************************************************/
+
+size_t magloop_count_output(
+    double dfStart,
+    double dfEnd,
+    double dfIncr
+) {
+    size_t iSize = 0;
+
+    double dfValue = dfStart;
+    double dfLast;
+    
+    do {
+        dfLast = dfValue; 
+        dfValue = dfValue + dfIncr;
+        iSize++;
+
+    } while (dfValue <= dfEnd && dfValue > dfLast);
+    
+    return iSize;
+}
+
+/*******************************************************************************
+ function to calc a loop with no iteration
+*******************************************************************************/
+
+void magloop_calc_mainloop(
     double LoopCircumference,
     double LoopConductorDiameter,
     double LoopConductorSpacing,
@@ -71,15 +365,12 @@ magloop_out_t *magloop_calc (
     double RelativePermeabilityConductor,
     /*double K,*/
     double TxPower,
-    double FrequencyLowLimit,
-    double FrequencyHighLimit,
-    double FrequencyStep,
+    double Frequency,
     int isSquare,
     int nLoops,
-    size_t *nOuts)
-{
-
-    magloop_out_t *result = NULL;
+    size_t i,
+    magloop_out_t *result
+) {
 
     // rf loss resistance for skin effect
     double RfResistanceSkinEffect;
@@ -95,9 +386,6 @@ magloop_out_t *magloop_calc (
 
     // area of the loop
     double LoopArea;
-
-    // operating frequency
-    double Frequency;
 
     // wavelength
     double Wavelength;
@@ -119,182 +407,143 @@ magloop_out_t *magloop_calc (
     }
 
     LoopConductorRadius=LoopConductorDiameter/2;
+
+    result[i].LoopCircumference  = LoopCircumference;
+    result[i].LoopConductorDiameter = LoopConductorDiameter;
+    result[i].LoopConductorSpacing = LoopConductorSpacing;
+    result[i].Frequency = Frequency;
+    result[i].nLoops = nLoops;
+
+    result[i].LoopDiamater = LoopDiamater;
+
+    Wavelength=W_F(Frequency);
     
-    /**** alocate output space *****/
+    /***** check some known limits on loop size *****/
 
-    double lastFreq = 0;
-    size_t i = 0;
-
-    Frequency=FrequencyLowLimit;
-    
-    do {
-        lastFreq = Frequency; 
-        Frequency = Frequency + FrequencyStep;
-        i++;
-
-    } while (Frequency <= FrequencyHighLimit && Frequency > lastFreq);
-    
-    /***** step might not divide evenly into the range *****/
-
-    if (Frequency > FrequencyHighLimit) {
-        i++;
+    result[i].CircCheck = 0;
+    if (LoopCircumference < Wavelength / 3) {
+        result[i].CircCheck = 1;
     }
 
-    *nOuts = i;
-            
-    if (NULL == (result = malloc( (i + 1) * sizeof(magloop_out_t) ) ) ) {
-
-        //fixme pRINT AN ERROR?
-        return NULL;
+    result[i].RadiusCheck = 0;
+    if (LoopRadius < Wavelength / (6 * M_PI)) {
+        result[i].RadiusCheck = 1;
     }
 
-    for ( i = 0, Frequency = FrequencyLowLimit;
-          i < *nOuts;
-          i++, Frequency = Frequency + FrequencyStep
-    ) {
+          
+    // calculate the radiation resistance
+    result[i].RadiationResistance = CalcRadiationResistance(
+        LoopArea,
+        Wavelength,
+        isSquare,
+        nLoops,
+        1);
+    
+    // skin effect
 
-        /***** step might not divide evenly into the range *****/
+    result[i].SkinDepth = SKIN_DEPTH_RFP(
+        Resistivity,
+        Frequency,
+        RelativePermeabilityConductor);
 
-        if (Frequency > FrequencyHighLimit) {
-            Frequency = FrequencyHighLimit;
-        }
+    RfResistanceSkinEffect = SKIN_RESISTANCE_THICK (
+        LoopCircumference,
+        Resistivity,
+        LoopConductorDiameter,
+        result[i].SkinDepth);
 
-        result[i].Frequency = Frequency;
+    // only 1 loop?
 
-        result[i].LoopDiamater = LoopDiamater;
+    if (nLoops == 1) {
 
-        Wavelength=W_F(Frequency);
+        result[i].RfResistanceLoss2=RfResistanceSkinEffect;
+    }
+
+    // the rf resistance loss decreases as
+    // the number of loops increase.
+    
+    else {
         
-        /***** check some known limits on loop size *****/
+        // more than one loop is present, estimate the proximity effect
 
-        result[i].CircCheck = 0;
-        if (LoopCircumference < Wavelength / 3) {
-            result[i].CircCheck = 1;
-        }
-
-        result[i].RadiusCheck = 0;
-        if (LoopRadius < Wavelength / (6 * M_PI)) {
-            result[i].RadiusCheck = 1;
-        }
-
-                  
-        // calculate the radiation resistance
-        result[i].RadiationResistance = CalcRadiationResistance(
-            LoopArea,
-            Wavelength,
-            isSquare,
-            nLoops,
-            1);
-        
-        // skin effect
-
-        result[i].SkinDepth = SKIN_DEPTH_RFP(
-            Resistivity,
-            Frequency,
-            RelativePermeabilityConductor);
-
-        RfResistanceSkinEffect = SKIN_RESISTANCE_THICK (
+        result[i].RfResistanceLoss2 = CalcProximity(
+            RfResistanceSkinEffect,
             LoopCircumference,
-            Resistivity,
             LoopConductorDiameter,
-            result[i].SkinDepth);
-
-        // only 1 loop?
-
-        if (nLoops == 1) {
-
-            result[i].RfResistanceLoss2=RfResistanceSkinEffect;
-        }
-
-        // the rf resistance loss decreases as
-        // the number of loops increase.
-        
-        else {
-            
-            // more than one loop is present, estimate the proximity effect
-
-            result[i].RfResistanceLoss2 = CalcProximity(
-                RfResistanceSkinEffect,
-                LoopCircumference,
-                LoopConductorDiameter,
-                LoopConductorSpacing,
-                nLoops);
-        }
-
-        // calculate the efficiency of the loop
-        result[i].Efficiency = CalcEfficiency(
-            result[i].RadiationResistance,
-            result[i].RfResistanceLoss2);
-
-        // calculate the inductance of the loop
-
-        //FIXME do we add in the conductors self inductance? is this formula correct?
-
-        //double self = ((PERMEABILITY_FS * RelativePermeabilityConductor) / 4) *LoopCircumference;
-        //printf("self inductance %.12lf\n", self);
-
-        if (!isSquare) {
-            result[i].LoopInductance = CalcLoopInductance(
-                LoopRadius,
-                RelativePermeabilityConductor,
-                LoopConductorRadius,
-                1/*,
-                K*/);
-        }
-        else {
-            result[i].LoopInductance = CalcSquareLoopInductance(
-                LoopDiamater,
-                RelativePermeabilityConductor,
-                LoopConductorRadius,
-                1/*,
-                K*/);
-        }
-        
-        // calculate the reactance of the loop
-        // as well as series input impedance
-
-        result[i].Xl= XL(
-            Frequency,
-            result[i].LoopInductance
-        );
-
-        result[i].LoopSeriesImpedance=sqrt(
-            result[i].RadiationResistance
-            + result[i].RfResistanceLoss2
-        );
-
-        Xc=result[i].Xl;
-
-        result[i].C = C_XcF(Xc, Frequency);
-
-        //FIXME why is the series resistance multiplied by 2 before the Q calc
-
-        result[i].Q=result[i].Xl
-                        / (2*(    result[i].RadiationResistance
-                                + result[i].RfResistanceLoss2));
-
-        result[i].SixDbBandwidth = Fbw_FcutQ(Frequency, result[i].Q);
-
-        result[i].SwrBandwidth=2*(result[i].SixDbBandwidth/(3/0.512));
-        result[i].LcDynamicResistance=result[i].Xl*result[i].Q;
-        
-        result[i].VMAX = E_PR(TxPower, result[i].LcDynamicResistance);
-
-        // calculate the area  of the small coupling loop
-
-        //FIXME this should be an input
-        double Zin=50.0;
-
-        result[i].PickupLoopArea = CalcPickupLoopArea(
-            LoopArea,
-            result[i].LoopSeriesImpedance,
-            Zin);
-
-
-
-        
+            LoopConductorSpacing,
+            nLoops);
     }
-    return result;
+
+    // calculate the efficiency of the loop
+    result[i].Efficiency = CalcEfficiency(
+        result[i].RadiationResistance,
+        result[i].RfResistanceLoss2);
+
+    // calculate the inductance of the loop
+
+    //FIXME do we add in the conductors self inductance? is this formula correct?
+
+    //double self = ((PERMEABILITY_FS * RelativePermeabilityConductor) / 4) *LoopCircumference;
+    //printf("self inductance %.12lf\n", self);
+
+    if (!isSquare) {
+        result[i].LoopInductance = CalcLoopInductance(
+            LoopRadius,
+            RelativePermeabilityConductor,
+            LoopConductorRadius,
+            1/*,
+            K*/);
+    }
+    else {
+        result[i].LoopInductance = CalcSquareLoopInductance(
+            LoopDiamater,
+            RelativePermeabilityConductor,
+            LoopConductorRadius,
+            1/*,
+            K*/);
+    }
+    
+    // calculate the reactance of the loop
+    // as well as series input impedance
+
+    result[i].Xl= XL(
+        Frequency,
+        result[i].LoopInductance
+    );
+
+    result[i].LoopSeriesImpedance=sqrt(
+        result[i].RadiationResistance
+        + result[i].RfResistanceLoss2
+    );
+
+    Xc=result[i].Xl;
+
+    result[i].C = C_XcF(Xc, Frequency);
+
+    //FIXME why is the series resistance multiplied by 2 before the Q calc
+
+    result[i].Q=result[i].Xl
+                    / (2*(    result[i].RadiationResistance
+                            + result[i].RfResistanceLoss2));
+
+    result[i].SixDbBandwidth = Fbw_FcutQ(Frequency, result[i].Q);
+
+    result[i].SwrBandwidth=2*(result[i].SixDbBandwidth/(3/0.512));
+    result[i].LcDynamicResistance=result[i].Xl*result[i].Q;
+    
+    result[i].VMAX = E_PR(TxPower, result[i].LcDynamicResistance);
+
+    // calculate the area  of the small coupling loop
+
+    //FIXME this should be an input
+    double Zin=50.0;
+
+    result[i].PickupLoopArea = CalcPickupLoopArea(
+        LoopArea,
+        result[i].LoopSeriesImpedance,
+        Zin);
+
+    return;
 }
 
 /*******************************************************************************
@@ -318,7 +567,6 @@ double CalcRadiationResistance(
 {
     double RadiationResistance;
 
-    
     // radiation resistance for a single loop
     // This is the favored model for radiation resistance in a loop
     // It is problematic in that it is an approximation, and it is not 
@@ -338,6 +586,7 @@ double CalcRadiationResistance(
     // is very close to 1.621 times greater than that of a square loop.
     //
     // correction for a square loop
+
     if (isSquare) {
         RadiationResistance = RadiationResistance / 1.621;
     }
@@ -400,7 +649,6 @@ double CalcProximity(
     );
 
     Rp=Ro*Rpo;
-    printf("Rp %.12lf Ro %.12lf Rpo %.12lf\n", Rp, Ro, Rpo);
     
 
     RfResistanceLoss2=(Rp+Ro)*LoopCircumference;

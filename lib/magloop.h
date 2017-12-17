@@ -10,8 +10,41 @@
 #define CUBED(N) ((N)*(N)*(N))
 #define FOURTH(N)  ((N)*(N)*(N)*(N))
 
-typedef struct magloop_out_struct { 
+typedef struct magloop_input_struct {
+    double LoopCircumference;
+    double LoopCircumferenceStart;
+    double LoopCircumferenceEnd;
+    double LoopCircumferenceIncr;
+    double LoopConductorDiameter;
+    double LoopConductorDiameterStart;
+    double LoopConductorDiameterEnd;
+    double LoopConductorDiameterIncr;
+    double LoopConductorSpacing;
+    double LoopConductorSpacingStart;
+    double LoopConductorSpacingEnd;
+    double LoopConductorSpacingIncr;
+    double Resistivity;
+    double RelativePermeabilityConductor;
+    /*double K,*/
+    double TxPower;
     double Frequency;
+    double FrequencyStart;
+    double FrequencyEnd;
+    double FrequencyIncr;
+    int isSquare;
+    int nLoops;
+    int nLoopsStart;
+    int nLoopsEnd;
+    int nLoopsIncr;
+
+} magloop_in_t;
+
+typedef struct magloop_out_struct { 
+    double LoopCircumference;
+    double LoopConductorDiameter;
+    double LoopConductorSpacing;
+    double Frequency;
+    int nLoops;
     double RadiationResistance;
     double SkinDepth;
     double RfResistanceLoss2;
@@ -36,7 +69,28 @@ typedef struct magloop_out_struct {
 single loop calc
 *******************************************************************************/
 
+
+
 magloop_out_t *magloop_calc (
+    magloop_in_t *sIn,
+    size_t *nOuts);
+
+magloop_out_t *magloop_calc_conductor (
+    double LoopCircumference,
+    double LoopConductorDiameterStart,
+    double LoopConductorDiameterEnd,
+    double LoopConductorDiameterIncr,
+    double LoopConductorSpacing,
+    double Resistivity,
+    double RelativePermeabilityConductor,
+    /*double K,*/
+    double TxPower,
+    double Frequency,
+    int isSquare,
+    int nLoops,
+    size_t *nOuts);
+
+void magloop_calc_mainloop(
     double LoopCircumference,
     double LoopConductorDiameter,
     double LoopConductorSpacing,
@@ -44,13 +98,12 @@ magloop_out_t *magloop_calc (
     double RelativePermeabilityConductor,
     /*double K,*/
     double TxPower,
-    double FrequencyLowLimit,
-    double FrequencyHighLimit,
-    double FrequencyStep,
+    double Frequency,
     int isSquare,
     int nLoops,
-    size_t *nOuts);
-
+    size_t i,
+    magloop_out_t *result
+);
 
 /*******************************************************************************
 @brief Fuction to calculate radiation resistance
